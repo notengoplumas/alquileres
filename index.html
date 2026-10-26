@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Alquileres Nueva Córdoba</title>
+<script>
+// Aplica el tema elegido antes de pintar, para que no parpadee.
+(function () { try { var t = localStorage.getItem('alq-tema'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
+</script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* Direction: Apple-style. Pale gray canvas, white grouped lists, one blue for actions and selection.
+   Orange marks what is new, green marks a price drop, everything else stays neutral.
+   Radius by role: 8 fields, 18 lists and panels, 28 the expanded map, capsules for chips and buttons. */
+:root {
+  --bg: #f5f5f7; --surface: #ffffff; --surface2: #f5f5f7; --ink: #1d1d1f; --ink2: #6e6e73; --line: #d2d2d7; --line2: #86868b;
+  --accent: #0071e3; --accent-ink: #ffffff; --link: #0066cc; --accent-soft: rgba(0, 113, 227, 0.1);
+  --nuevo-bg: #ffefd6; --nuevo-ink: #9a4400; --nuevo-fill: #ff9f0a; --nuevo-fill-ink: #1d1d1f;
+  --baja-bg: #e3f5e9; --baja-ink: #156a35; --warn-ink: #9a4400;
+  --chip: #e8e8ed; --chip-ink: #1d1d1f; --chip-on: #1d1d1f; --chip-on-ink: #ffffff;
+  --zone: rgba(0, 113, 227, 0.07); --street: #d2d2d7; --street-label: #6e6e73;
+  --pill: #ffffff; --pill-ink: #1d1d1f; --visto-fill: #e8e8ed; --visto-ink: #6e6e73;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.1);
+  --text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --display: "SF Pro Display", "Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --surface: #1c1c1e; --surface2: #2c2c2e; --ink: #f5f5f7; --ink2: #a1a1a6; --line: #38383a; --line2: #6e6e73;
+    --accent: #0a84ff; --link: #2997ff; --accent-soft: rgba(10, 132, 255, 0.2);
+    --nuevo-bg: rgba(255, 159, 10, 0.2); --nuevo-ink: #ffb340; --nuevo-fill: #ff9f0a; --nuevo-fill-ink: #000000;
+    --baja-bg: rgba(48, 209, 88, 0.17); --baja-ink: #32d74b; --warn-ink: #ffb340;
+    --chip: #2c2c2e; --chip-ink: #f5f5f7; --chip-on: #f5f5f7; --chip-on-ink: #000000;
+    --zone: rgba(10, 132, 255, 0.14); --street: #48484a; --street-label: #a1a1a6;
+    --pill: #2c2c2e; --pill-ink: #f5f5f7; --visto-fill: #1c1c1e; --visto-ink: #8e8e93;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --surface: #1c1c1e; --surface2: #2c2c2e; --ink: #f5f5f7; --ink2: #a1a1a6; --line: #38383a; --line2: #6e6e73;
+  --accent: #0a84ff; --link: #2997ff; --accent-soft: rgba(10, 132, 255, 0.2);
+  --nuevo-bg: rgba(255, 159, 10, 0.2); --nuevo-ink: #ffb340; --nuevo-fill: #ff9f0a; --nuevo-fill-ink: #000000;
+  --baja-bg: rgba(48, 209, 88, 0.17); --baja-ink: #32d74b; --warn-ink: #ffb340;
+  --chip: #2c2c2e; --chip-ink: #f5f5f7; --chip-on: #f5f5f7; --chip-on-ink: #000000;
+  --zone: rgba(10, 132, 255, 0.14); --street: #48484a; --street-label: #a1a1a6;
+  --pill: #2c2c2e; --pill-ink: #f5f5f7; --visto-fill: #1c1c1e; --visto-ink: #8e8e93;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { color-scheme: light; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--text); font-size: 15px; line-height: 1.45; letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 72px;
+}
+.wrap { max-width: 1200px; margin: 0 auto; }
+button { font: inherit; color: inherit; letter-spacing: inherit; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* encabezado */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 24px; }
+h1 { margin: 0; font-family: var(--display); font-size: clamp(30px, 5.2vw, 44px); line-height: 1.08; font-weight: 600; letter-spacing: -0.025em; text-wrap: balance; }
+.lead { margin: 8px 0 0; color: var(--ink2); font-size: 17px; line-height: 1.4; letter-spacing: -0.017em; max-width: 52ch; }
+.seg { display: inline-flex; padding: 3px; background: var(--chip); border-radius: 980px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: 980px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--ink2); min-height: 30px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18); }
+.estado { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin: 18px 0 0; font-size: 13px; color: var(--ink2); }
+.estado .sello { font-weight: 600; color: var(--ink); }
+.fuente { display: inline-flex; align-items: center; gap: 6px; }
+.fuente::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #30b05a; }
+.fuente.mal { color: var(--warn-ink); font-weight: 600; }
+.fuente.mal::before { background: var(--nuevo-fill); }
+.aviso { margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: var(--nuevo-bg); color: var(--nuevo-ink); font-size: 14px; }
+
+.shell { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; margin-top: 24px; }
+@media (max-width: 960px) { .shell { grid-template-columns: minmax(0, 1fr); } .mapcol { display: none; } .verMapa { display: inline-flex !important; } }
+
+/* filtros */
+.panel { background: var(--surface); border-radius: 18px; padding: 24px 26px; display: flex; flex-direction: column; gap: 22px; }
+.fila { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
+.fila .lab { font-size: 14px; color: var(--ink2); }
+.panel .chips { padding-top: 22px; border-top: 1px solid var(--line); }
+select {
+  font: inherit; font-size: 14px; font-weight: 500; color: var(--ink); background-color: var(--surface2); border: 1px solid transparent; border-radius: 980px;
+  padding: 9px 36px 9px 18px; min-height: 42px; appearance: none; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink2) 50%), linear-gradient(135deg, var(--ink2) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 18px, calc(100% - 15px) 18px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+}
+select:hover { border-color: var(--line); }
+.chips { display: flex; flex-wrap: wrap; gap: 12px 12px; }
+.chip { position: relative; }
+.chip input { position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0; width: 100%; height: 100%; }
+.chip span { display: inline-flex; align-items: center; min-height: 42px; padding: 8px 20px; border-radius: 980px; background: var(--chip); color: var(--chip-ink); font-size: 14px; font-weight: 500; user-select: none; }
+.chip input:checked + span { background: var(--chip-on); color: var(--chip-on-ink); font-weight: 600; }
+.chip input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sp { flex: 1 1 auto; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 980px; padding: 8px 16px; min-height: 36px; font-size: 14px; font-weight: 500; cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn:hover { filter: brightness(1.08); }
+.btn.sec { background: var(--chip); color: var(--ink); }
+.btn svg { width: 15px; height: 15px; stroke: currentColor; }
+.verMapa { display: none; }
+
+.resumen { margin: 26px 0 12px; }
+.resumen h2 { margin: 0; font-family: var(--display); font-size: 24px; line-height: 1.17; font-weight: 600; letter-spacing: -0.02em; }
+.resumen p { margin: 4px 0 0; color: var(--ink2); font-size: 14px; }
+
+/* lista agrupada */
+.lista { background: var(--surface); border-radius: 18px; overflow: hidden; }
+.row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 18px; padding: 16px 20px; scroll-margin-top: 16px; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 20px; right: 0; height: 1px; background: var(--line); }
+.row.sel { background: var(--accent-soft); }
+.ttl { font-size: 17px; font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.det { color: var(--ink2); font-size: 14px; margin-top: 2px; }
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 8px; }
+.tags:empty { display: none; }
+.cap { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 980px; font-size: 12px; font-weight: 600; line-height: 1.5; letter-spacing: 0; }
+.cap.nuevo { background: var(--nuevo-bg); color: var(--nuevo-ink); }
+.cap.baja { background: var(--baja-bg); color: var(--baja-ink); }
+.cap svg { width: 10px; height: 10px; stroke: currentColor; }
+.tag { font-size: 13px; color: var(--ink2); }
+.lnk { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 9px; font-size: 14px; }
+.lnk a { font-weight: 500; }
+.side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.tot { font-size: 21px; font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; white-space: nowrap; text-align: right; }
+.tot small { display: block; font-size: 12px; font-weight: 400; color: var(--ink2); letter-spacing: 0; margin-bottom: 1px; }
+.vb { display: inline-flex; align-items: center; gap: 7px; border: 0; background: none; padding: 4px 0; cursor: pointer; color: var(--ink2); font-size: 13px; }
+.vb .o { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line2); display: grid; place-items: center; flex: none; }
+.vb .o svg { width: 12px; height: 12px; stroke: #fff; opacity: 0; }
+.vb[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+.vb[aria-pressed="true"] .o { background: var(--accent); border-color: var(--accent); }
+.vb[aria-pressed="true"] .o svg { opacity: 1; }
+.row.visto .ttl, .row.visto .tot { color: var(--ink2); font-weight: 500; }
+.vacio { padding: 32px 20px; color: var(--ink2); }
+details.mas { margin-top: 24px; }
+details.mas > summary { cursor: pointer; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; padding: 4px 2px 12px; list-style: none; display: flex; align-items: baseline; gap: 8px; }
+details.mas > summary::-webkit-details-marker { display: none; }
+details.mas > summary::before { content: ""; width: 7px; height: 7px; border-right: 2px solid var(--ink2); border-bottom: 2px solid var(--ink2); transform: rotate(-45deg); transition: transform 0.2s; align-self: center; margin-right: 4px; }
+details.mas[open] > summary::before { transform: rotate(45deg); }
+details.mas > summary small { color: var(--ink2); font-weight: 400; font-size: 13px; }
+.nota { margin-top: 32px; color: var(--ink2); font-size: 12.5px; line-height: 1.5; max-width: 68ch; }
+.nota p { margin: 0 0 8px; }
+
+/* columna del mapa */
+.mapcol { position: sticky; top: 16px; }
+.mapcard { background: var(--surface); border-radius: 22px; overflow: hidden; }
+.maphead { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px 18px; }
+.maphead strong { font-family: var(--display); font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.mapcard .lienzo { width: 100%; height: 480px; background: var(--surface2); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 18px 14px; font-size: 12.5px; color: var(--ink2); }
+.leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.i-def { background: var(--ink); } .i-nu { background: var(--nuevo-fill); } .i-vi { background: var(--line2); opacity: 0.55; } .i-se { background: var(--accent); }
+.calle { font-family: var(--text); font-weight: 600; fill: var(--street-label); paint-order: stroke; stroke: var(--surface); stroke-linejoin: round; letter-spacing: 0; }
+.mk { cursor: pointer; }
+.mk:focus-visible { outline: none; }
+.mk:focus-visible rect.cuerpo { stroke: var(--accent); }
+
+/* mapa ampliado */
+dialog { border: 0; padding: 0; background: var(--surface); color: var(--ink); width: min(1240px, 96vw); height: min(900px, 92dvh); border-radius: 28px; overflow: hidden; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4); }
+dialog::backdrop { background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+dialog[open] { display: flex; flex-direction: column; }
+@media (max-width: 700px) { dialog { width: 100vw; height: 100dvh; max-width: 100vw; max-height: 100dvh; border-radius: 0; } }
+.dh { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 12px; }
+.dh strong { font-family: var(--display); font-size: 21px; font-weight: 600; letter-spacing: -0.02em; }
+.dh .btn { min-width: 76px; }
+.lienzoG { position: relative; flex: 1 1 auto; min-height: 0; background: var(--surface); border-top: 1px solid var(--line); touch-action: none; }
+.lienzoG:focus { outline: none; }
+.gm { position: absolute; inset: 0; }
+.leyG, .hoja, .pista { z-index: 1000; }
+.herr { position: absolute; top: 14px; right: 14px; display: flex; flex-direction: column; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.herr button { width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; color: var(--ink); }
+.herr button + button { border-top: 1px solid var(--line); }
+.herr button:hover { background: var(--surface2); }
+.herr svg { width: 18px; height: 18px; stroke: currentColor; }
+.leyG { position: absolute; top: 14px; left: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 9px 14px; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); font-size: 12.5px; color: var(--ink2); width: fit-content; max-width: calc(100% - 88px); }
+.leyG i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.escala { position: absolute; left: 16px; bottom: 14px; font-size: 11.5px; font-weight: 600; color: var(--ink); display: flex; flex-direction: column; gap: 3px; pointer-events: none; text-shadow: 0 0 4px var(--surface), 0 0 4px var(--surface); }
+.escala b { display: block; height: 6px; border: 2px solid var(--ink); border-top: 0; }
+.hoja { position: absolute; left: 14px; right: 14px; bottom: 14px; max-height: 46%; overflow: auto; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 14px 18px 8px; }
+.hoja[hidden] { display: none; }
+.hoja .cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 6px; }
+.hoja .cab b { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.hoja .cab span { color: var(--ink2); font-size: 13px; }
+.hoja .x { margin-left: auto; width: 28px; height: 28px; border-radius: 50%; border: 0; background: var(--chip); cursor: pointer; display: grid; place-items: center; flex: none; align-self: center; }
+.hoja .x svg { width: 12px; height: 12px; stroke: var(--ink2); }
+.ci { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 14px; padding: 12px 0; }
+.ci::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line); }
+.ci .ct { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; text-align: right; grid-column: 2; grid-row: 1; }
+.ci .cd { color: var(--ink2); font-size: 13.5px; grid-column: 1; grid-row: 1; align-self: center; }
+.ci .tags { grid-column: 1 / -1; margin-top: 4px; }
+.ci .lnk { grid-column: 1; margin-top: 4px; }
+.ci .vb { grid-column: 2; justify-self: end; align-self: end; }
+.ci.visto .ct { color: var(--ink2); font-weight: 500; }
+.pista { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--surface); color: var(--ink2); border-radius: 980px; padding: 9px 18px; box-shadow: var(--shadow); font-size: 13.5px; pointer-events: none; white-space: nowrap; max-width: calc(100% - 28px); overflow: hidden; text-overflow: ellipsis; }
+.pista[hidden] { display: none; }
+
+/* Leaflet con el estilo de la página */
+.leaflet-container { font-family: var(--text); background: var(--surface2); }
+.leaflet-bar { border: 0 !important; box-shadow: var(--shadow) !important; border-radius: 12px !important; overflow: hidden; }
+.leaflet-bar a { background: var(--surface) !important; color: var(--ink) !important; border-bottom: 1px solid var(--line) !important; width: 40px !important; height: 40px !important; line-height: 38px !important; font-size: 20px !important; }
+.leaflet-bar a:last-child { border-bottom: 0 !important; }
+.leaflet-bar a:hover { background: var(--surface2) !important; }
+.leaflet-control-attribution { background: var(--surface) !important; color: var(--ink2) !important; opacity: 0.92; font-size: 10.5px; border-radius: 8px 0 0 0; }
+.leaflet-control-attribution a { color: var(--link) !important; }
+.leaflet-control-scale-line { background: var(--surface) !important; color: var(--ink) !important; border-color: var(--ink) !important; font-weight: 600; }
+.leaflet-tooltip { font: 500 12.5px var(--text); color: var(--ink); background: var(--surface); border: 0; box-shadow: var(--shadow); border-radius: 8px; padding: 5px 9px; }
+.leaflet-tooltip-top:before { border-top-color: var(--surface); }
+.sinmapa { padding: 24px; color: var(--ink2); }
+.osc .leaflet-tile-pane, .osc .leaflet-layer { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(92%); }
+.maplibregl-ctrl-attrib, .maplibregl-ctrl-logo { display: none !important; }
+.pillwrap { background: none; border: 0; }
+.pill { position: absolute; left: 0; top: 0; z-index: 0; transform: translate(-50%, calc(-100% - 8px)); display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border-radius: 980px; background: var(--pill); color: var(--pill-ink); font: 700 13.5px/1 var(--text); letter-spacing: 0; white-space: nowrap; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.1); cursor: pointer; }
+.pill::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 9px; height: 9px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 2px; z-index: -1; }
+.pill i { font-style: normal; display: grid; place-items: center; min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px; background: var(--ink); color: var(--surface); font-size: 11px; font-weight: 700; }
+.pill.nuevo { background: var(--nuevo-fill); color: var(--nuevo-fill-ink); }
+.pill.visto { background: var(--visto-fill); color: var(--visto-ink); opacity: 0.9; }
+.pill.sel { background: var(--accent); color: #ffffff; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45); }
+.pill.sel i { background: #ffffff; color: var(--accent); }
+.leaflet-marker-icon:focus-visible .pill { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .row { padding: 14px 16px; gap: 2px 12px; }
+  .row + .row::before { left: 16px; }
+  .tot { font-size: 19px; }
+  .panel { padding: 20px 18px; gap: 18px; }
+  .panel .chips { padding-top: 18px; gap: 10px; }
+  .chip span { padding: 8px 16px; }
+}
+@media (prefers-reduced-motion: no-preference) { .row, .chip span, .seg button { transition: background-color 0.2s, color 0.2s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Alquileres en Nueva Córdoba</h1>
+      <p class="lead">Departamentos de 1 dormitorio dentro de la zona que marcaste. El total suma alquiler y expensas.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Tema de la página">
+      <button type="button" data-tema="auto" aria-pressed="true">Auto</button>
+      <button type="button" data-tema="light" aria-pressed="false">Claro</button>
+      <button type="button" data-tema="dark" aria-pressed="false">Oscuro</button>
+    </div>
+  </header>
+  <div class="estado" id="estado"><span class="sello">Cargando…</span></div>
+  <div id="aviso"></div>
+
+  <div class="shell">
+    <main>
+      <section class="panel" aria-label="Filtros">
+        <div class="fila">
+          <span class="lab">Total entre</span>
+          <select id="min" aria-label="Total desde"></select>
+          <span class="lab">y</span>
+          <select id="max" aria-label="Total hasta"></select>
+          <span class="sp"></span>
+          <select id="so" aria-label="Ordenar">
+            <option value="t">Total, menor primero</option>
+            <option value="n">Más nuevos primero</option>
+            <option value="r">Alquiler, menor primero</option>
+            <option value="s">Por calle</option>
+          </select>
+          <button class="btn sec verMapa" id="verMapa" type="button"><svg viewBox="0 0 16 16" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5l4-1.5 4 1.5 4-1.5v10.5l-4 1.5-4-1.5-4 1.5z"/><path d="M6 2v10.5M10 3.5V14"/></svg>Ver mapa</button>
+        </div>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" id="nu"><span>Solo nuevos</span></label>
+          <label class="chip"><input type="checkbox" id="oc"><span>Ocultar vistos</span></label>
+          <label class="chip"><input type="checkbox" id="bd" checked><span>Incluir el borde</span></label>
+          <label class="chip"><input type="checkbox" id="pa"><span>Particulares</span></label>
+          <label class="chip"><input type="checkbox" id="sc"><span>Sin comisión</span></label>
+        </div>
+      </section>
+
+      <div class="resumen"><h2 id="count"></h2><p id="count2"></p></div>
+      <div class="lista" id="list"></div>
+      <details class="mas" id="unk">
+        <summary><span id="unks"></span></summary>
+        <div class="lista" id="ulist"></div>
+      </details>
+      <div class="nota">
+        <p>La ubicación sale de la calle y la altura publicada en cada aviso. En La Voz, cuando el aviso no trae dirección, se usa el punto que marcó quien lo publicó. Las alturas redondas (&ldquo;al 500&rdquo;) son aproximadas, y cerca del límite un aviso puede quedar de un lado o del otro.</p>
+        <p>Las expensas son las que figuran en cada aviso y no incluyen luz, agua ni impuestos. Un mismo departamento publicado en varios sitios aparece una sola vez. &ldquo;Nuevo&rdquo; marca lo que apareció en las últimas 48 horas. Lo que marcás como visto se guarda solo en este dispositivo.</p>
+      </div>
+    </main>
+
+    <aside class="mapcol">
+      <div class="mapcard">
+        <div class="maphead"><strong>Tu zona</strong>
+          <button class="btn" id="ampliar" type="button"><svg viewBox="0 0 16 16" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2H14v4.5M6.5 14H2V9.5M14 2L9 7M2 14l5-5"/></svg>Ampliar</button>
+        </div>
+        <div class="lienzo" id="mapa" role="region" aria-label="Mapa de la zona"></div>
+        <div class="leyenda"><span><i class="i-def"></i>Aviso</span><span><i class="i-nu"></i>Nuevo</span><span><i class="i-vi"></i>Visto</span></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<dialog id="dlg" aria-label="Mapa de la zona">
+  <div class="dh"><strong>Tu zona</strong><button class="btn" id="cerrar" type="button">Cerrar</button></div>
+  <div class="lienzoG" id="lienzoG" tabindex="-1" autofocus>
+    <div id="mapaG" class="gm"></div>
+    <div class="leyG"><span>Cada precio es el más bajo del edificio</span><span><i style="background:var(--nuevo-fill)"></i>Nuevo</span><span><i style="background:var(--line2);opacity:.55"></i>Visto</span></div>
+    <div class="pista" id="pista">Tocá un precio para ver el aviso. Acercá para separar los edificios.</div>
+    <div class="hoja" id="hoja" hidden></div>
+  </div>
+</dialog>
+
+<script>
+const SRC = {
+  Z: ['ZonaProp', id => 'https://www.zonaprop.com.ar/propiedades/clasificado/alclapin-x-' + id + '.html'],
+  L: ['La Voz', id => 'https://clasificados.lavoz.com.ar/avisos/inmuebles/departamento/' + id + '/x'],
+  A: ['Argenprop', id => 'https://www.argenprop.com/departamento-en-alquiler-en-nueva-cordoba--' + id],
+  M: ['Mercado Libre', id => 'https://departamento.mercadolibre.com.ar/MLA-' + id + '-x-_JM']
+};
+const CHECK = '<svg viewBox="0 0 12 12" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.4 6.6l2.4 2.4 4.8-5.4"/></svg>';
+const FLECHA = '<svg viewBox="0 0 12 12" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8M2.8 6.8L6 10l3.2-3.2"/></svg>';
+const CERRAR = '<svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>';
+const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format;
+const $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const H48 = 48 * 3600e3, D14 = 14 * 864e5;
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function hace(ts) {
+  const m = Math.max(0, Math.round((Date.now() - ts) / 60000));
+  if (m < 2) return 'recién';
+  if (m < 90) return 'hace ' + m + ' min';
+  const h = Math.round(m / 60);
+  if (h < 36) return 'hace ' + h + ' h';
+  return 'hace ' + Math.round(h / 24) + ' días';
+}
+function leer(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+function guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+let D = null, groups = [], NAMES = {}, FIT = {}, vistos = new Set(leer('alq-vistos', [])), sel = null, vigentes = [], hojaItems = null;
+const mins = [500000, 550000, 600000, 650000], maxs = [650000, 700000, 750000, 800000];
+const LM = {};
+
+/* ---------- tema ---------- */
+function aplicarTema(t) {
+  const r = document.documentElement;
+  if (t === 'light' || t === 'dark') r.setAttribute('data-theme', t); else r.removeAttribute('data-theme');
+  try { if (t === 'auto') localStorage.removeItem('alq-tema'); else localStorage.setItem('alq-tema', t); } catch (e) {}
+  marcarTema(t);
+  if (D) temaMapas();
+}
+function marcarTema(t) { document.querySelectorAll('[data-tema]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tema === t))); }
+document.querySelectorAll('[data-tema]').forEach(b => b.addEventListener('click', () => aplicarTema(b.dataset.tema)));
+(function () { let t = 'auto'; try { const s = localStorage.getItem('alq-tema'); if (s === 'light' || s === 'dark') t = s; } catch (e) {} marcarTema(t); })();
+
+fetch('data.json?t=' + Date.now(), { cache: 'no-store' })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(init)
+  .catch(() => { $('estado').innerHTML = '<span class="sello">Sin datos todavía</span>'; $('count').textContent = 'Ejecutá "Actualizar ahora" en la compu para generar el primer resultado.'; });
+
+function init(d) {
+  D = d;
+  for (const k in D.zona.calles) { NAMES[k] = D.zona.calles[k].nombre; FIT[k] = D.zona.calles[k].fit; }
+  const e = $('estado'); e.textContent = '';
+  const s0 = document.createElement('span'); s0.className = 'sello';
+  s0.textContent = 'Actualizado ' + new Date(D.generado).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+  e.appendChild(s0);
+  let falla = false;
+  for (const k of ['Z', 'L', 'A', 'M']) {
+    const s = D.fuentes[k]; if (!s) continue;
+    const c = document.createElement('span'); c.className = 'fuente' + (s.ok ? '' : ' mal');
+    c.textContent = s.nombre + ' ' + (s.ok ? hace(s.ts) : (s.ts ? 'sin leer desde ' + hace(s.ts).replace('hace ', '') : 'sin datos'));
+    if (!s.ok && s.error) c.title = s.error;
+    if (!s.ok) falla = true;
+    e.appendChild(c);
+  }
+  const horas = (Date.now() - D.generado) / 3600000;
+  $('aviso').textContent = '';
+  if (horas > 14 || falla) {
+    const p = document.createElement('div'); p.className = 'aviso';
+    p.textContent = horas > 14 ? 'Hace más de ' + Math.floor(horas) + ' horas que no se actualiza. Puede que la compu esté apagada. Estos son los datos de la última lectura.' : 'Alguno de los sitios no se pudo leer en la última pasada. Se muestran sus datos anteriores.';
+    $('aviso').appendChild(p);
+  }
+  armarGrupos(); armarFiltros();
+  iniciarMapas(); render();
+}
+
+/* ---------- avisos repetidos: se muestran una sola vez ---------- */
+function armarGrupos() {
+  const rows = D.filas.map(r => Object.assign({}, r, { f: r.f || '' }));
+  rows.sort((a, b) => (b.e !== null) - (a.e !== null));
+  const same = (g, r) => {
+    if (g.r !== r.r) return false;
+    if (g.st === '?' || r.st === '?') {
+      if (g.st !== r.st || g.lat == null || r.lat == null) return false;
+      return Math.hypot((r.lat - g.lat) * 111000, (r.lng - g.lng) * 94900) < 40 && (g.e === r.e || g.e === null || r.e === null);
+    }
+    if (g.st !== r.st || Math.abs(g.n - r.n) > 60) return false;
+    return !(g.e !== null && r.e !== null && g.e !== r.e);
+  };
+  groups = [];
+  for (const r of rows) {
+    let g = groups.find(x => same(x, r));
+    if (!g) { g = { st: r.st, n: r.n, r: r.r, e: r.e, z: r.z, f: new Set(), src: [], keys: [], lat: r.lat, lng: r.lng, p: undefined, baja: 0 }; groups.push(g); }
+    if (g.e === null && r.e !== null) g.e = r.e;
+    if (r.z === 'i') g.z = 'i';
+    if (g.n !== null && g.n % 100 === 0 && r.n !== null && r.n % 100 !== 0) g.n = r.n;
+    for (const c of r.f) g.f.add(c);
+    if (!g.src.some(x => x.s === r.s && x.id === r.id)) { g.src.push({ s: r.s, id: r.id }); g.keys.push(r.s + ':' + r.id); }
+    if (r.p == null) g.p = null; else if (g.p !== null) g.p = g.p === undefined ? r.p : Math.min(g.p, r.p);
+    if (r.c && r.a && r.a > r.r && Date.now() - r.c < D14) g.baja = Math.max(g.baja, r.a - r.r);
+  }
+  for (const g of groups) { if (g.p === undefined) g.p = null; g.nuevo = g.p !== null && Date.now() - g.p < H48; }
+}
+const visto = g => g.keys.some(k => vistos.has(k));
+function marcarVisto(g, v) { for (const k of g.keys) { if (v) vistos.add(k); else vistos.delete(k); } guardar('alq-vistos', [...vistos]); }
+function pos(g) {
+  if (g.st !== '?' && FIT[g.st]) { const f = FIT[g.st]; return [f[0] + f[1] * g.n, f[2] + f[3] * g.n]; }
+  return g.lat != null ? [g.lat, g.lng] : null;
+}
+function etiqueta(g) { return g.st === '?' ? 'Dirección no publicada' : (NAMES[g.st] || g.st) + (g.n % 100 === 0 ? ' al ' : ' ') + g.n; }
+
+/* ---------- filtros ---------- */
+function armarFiltros() {
+  $('min').innerHTML = mins.map(v => '<option value="' + v + '"' + (v === 550000 ? ' selected' : '') + '>' + money(v) + '</option>').join('');
+  $('max').innerHTML = maxs.map(v => '<option value="' + v + '"' + (v === 750000 ? ' selected' : '') + '>' + money(v) + '</option>').join('');
+  const s = leer('alq-filtros2', null);
+  if (s) {
+    if (mins.includes(s.min)) $('min').value = s.min;
+    if (maxs.includes(s.max)) $('max').value = s.max;
+    for (const id of ['nu', 'oc', 'bd', 'pa', 'sc']) if (id in s) $(id).checked = !!s[id];
+    if (['t', 'n', 'r', 's'].includes(s.so)) $('so').value = s.so;
+  }
+  ['min', 'max', 'nu', 'oc', 'bd', 'pa', 'sc', 'so'].forEach(id => $(id).addEventListener('change', render));
+}
+
+/* ---------- lista ---------- */
+function capsulas(g, corto) {
+  const t = [];
+  if (g.nuevo) t.push('<span class="cap nuevo" title="Apareció ' + hace(g.p) + '">Nuevo</span>');
+  if (g.baja) t.push('<span class="cap baja" title="Bajó el alquiler en los últimos 14 días">' + FLECHA + 'Bajó ' + money(g.baja) + '</span>');
+  if (g.z === 'b') t.push('<span class="tag">' + (corto ? 'Borde' : 'Borde de la zona') + '</span>');
+  if (g.f.has('P')) t.push('<span class="tag">Particular</span>');
+  if (g.f.has('S')) t.push('<span class="tag">Sin comisión</span>');
+  if (g.st === '?' && !corto) t.push('<span class="tag">Ubicación según el aviso</span>');
+  return t.join('');
+}
+const enlaces = g => g.src.map(x => '<a href="' + SRC[x.s][1](x.id) + '" target="_blank" rel="noopener" data-vis="1">' + SRC[x.s][0] + '</a>').join('');
+const botonVisto = (g, v) => '<button class="vb" type="button" aria-pressed="' + v + '" data-vb="' + g.i + '"><span class="o">' + CHECK + '</span>' + (v ? 'Visto' : 'Marcar visto') + '</button>';
+function filaHtml(g, desconocido) {
+  const v = visto(g);
+  const det = desconocido ? 'Alquiler ' + money(g.r) + ' + expensas sin publicar' : 'Alquiler ' + money(g.r) + ' + expensas ' + money(g.e);
+  const tot = desconocido ? '<small>Alquiler</small>' + money(g.r) : '<small>Total</small>' + money(g.r + g.e);
+  return '<div class="row' + (v ? ' visto' : '') + (sel === g ? ' sel' : '') + '" data-i="' + g.i + '" id="g' + g.i + '">' +
+    '<div class="main"><div class="ttl">' + etiqueta(g) + '</div><div class="det">' + det + '</div><div class="tags">' + capsulas(g, false) + '</div><div class="lnk">' + enlaces(g) + '</div></div>' +
+    '<div class="side"><div class="tot">' + tot + '</div>' + botonVisto(g, v) + '</div></div>';
+}
+function render() {
+  const min = +$('min').value, max = +$('max').value, o = {};
+  for (const id of ['nu', 'oc', 'bd', 'pa', 'sc']) o[id] = $(id).checked;
+  guardar('alq-filtros2', Object.assign({ min, max, so: $('so').value }, o));
+  const ok = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.nu || g.nuevo) && (!o.oc || !visto(g));
+  const main = [], unk = [];
+  groups.forEach((g, i) => {
+    g.i = i;
+    if (!ok(g)) return;
+    if (g.e !== null) { const t = g.r + g.e; if (t >= min && t <= max) main.push(g); }
+    else if (g.r >= min - 150000 && g.r <= max - 50000) unk.push(g);
+  });
+  const cmp = {
+    t: (a, b) => (a.r + a.e) - (b.r + b.e) || a.r - b.r,
+    n: (a, b) => (b.p || 0) - (a.p || 0) || (a.r + a.e) - (b.r + b.e),
+    r: (a, b) => a.r - b.r || (a.e || 0) - (b.e || 0),
+    s: (a, b) => etiqueta(a).localeCompare(etiqueta(b), 'es') || a.r - b.r
+  }[$('so').value];
+  main.sort(cmp); unk.sort((a, b) => a.r - b.r || etiqueta(a).localeCompare(etiqueta(b), 'es'));
+  vigentes = main.concat(unk);
+  const nn = main.filter(g => g.nuevo).length, vv = main.filter(visto).length, bb = main.filter(g => g.baja).length;
+  $('count').textContent = main.length + (main.length === 1 ? ' departamento' : ' departamentos') + ' entre ' + money(min) + ' y ' + money(max);
+  $('count2').textContent = [nn + (nn === 1 ? ' nuevo' : ' nuevos'), bb + (bb === 1 ? ' bajó de precio' : ' bajaron de precio'), vv + (vv === 1 ? ' visto' : ' vistos'), unk.length + ' sin expensas publicadas'].join(', ');
+  $('list').innerHTML = main.length ? main.map(g => filaHtml(g, false)).join('') : '<div class="vacio">No hay avisos con esos filtros. Probá ampliar el rango de total o sumar el borde de la zona.</div>';
+  $('unks').innerHTML = 'Sin expensas publicadas (' + unk.length + ') <small>alquiler entre ' + money(min - 150000) + ' y ' + money(max - 50000) + '</small>';
+  $('ulist').innerHTML = unk.length ? unk.map(g => filaHtml(g, true)).join('') : '<div class="vacio">Ninguno con estos filtros.</div>';
+  pintarMapas();
+}
+document.addEventListener('click', ev => {
+  const vb = ev.target.closest('[data-vb]');
+  if (vb) { const g = groups[+vb.dataset.vb]; marcarVisto(g, !visto(g)); render(); if (hojaItems && $('dlg').open) hoja(hojaItems); return; }
+  const a = ev.target.closest('a[data-vis]');
+  if (a) { const cont = a.closest('[data-i]'); if (cont) { const g = groups[+cont.dataset.i]; if (!visto(g)) { marcarVisto(g, true); setTimeout(() => { render(); if (hojaItems && $('dlg').open) hoja(hojaItems); }, 400); } } }
+});
+
+/* ---------- mapa real (Leaflet + mapas de Esri) ---------- */
+const oscuro = () => { const t = document.documentElement.getAttribute('data-theme'); return t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches); };
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+const OSM = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+function capasBase(m) {
+  // si el proveedor principal falla varias veces seguidas, se pasa al otro
+  const respaldo = (c, url, atrib) => { let fallos = 0; c.on('tileerror', () => { if (++fallos === 6 && !m._resp) m._resp = L.tileLayer(url, { maxZoom: 19, attribution: atrib }).addTo(m); }); return c; };
+  // mapa vectorial minimalista (OpenFreeMap, estilo "positron"): casi sin colores ni íconos y con los nombres de las calles nítidos en todos los zooms.
+  // En modo oscuro se invierte con un filtro. Si la librería vectorial no carga, se usa el mapa de OpenStreetMap.
+  const hayWebGL = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })();
+  if (window.maplibregl && L.maplibreGL && hayWebGL) {
+    return [L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron', attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://openmaptiles.org" target="_blank" rel="noopener">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' })];
+  }
+  return [respaldo(L.tileLayer(OSM, { maxNativeZoom: 19, maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }), ESRI + 'World_Street_Map/MapServer/tile/{z}/{y}/{x}', 'Mapa © Esri')];
+}
+function ponerBase(m) { (m._base || []).forEach(c => m.removeLayer(c)); m._base = capasBase(m); m._base.forEach(c => c.addTo(m)); m.getContainer().classList.toggle('osc', oscuro()); }
+const limitesZona = () => L.latLngBounds(D.zona.poligono.map(p => [p[1], p[0]]));
+function crearMapa(id, grande) {
+  const m = L.map(id, { zoomControl: false, scrollWheelZoom: grande, minZoom: 13, maxZoom: 19, zoomSnap: 0.5 });
+  m.attributionControl.setPrefix(false);
+  L.control.zoom({ position: grande ? 'topright' : 'bottomright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(m);
+  if (grande) L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(m);
+  ponerBase(m);
+  m.fitBounds(limitesZona(), { padding: [grande ? 50 : 16, grande ? 50 : 16] });
+  m._capa = L.layerGroup().addTo(m);
+  return m;
+}
+function iniciarMapas() {
+  if (!window.L) { $('mapa').innerHTML = '<div class="sinmapa">No se pudo cargar el mapa. Revisá la conexión.</div>'; return; }
+  LM.chico = crearMapa('mapa', false);
+  if ('ResizeObserver' in window) new ResizeObserver(() => { if ($('mapa').clientWidth > 0) { LM.chico.invalidateSize(); if (!LM.chico._ajustado) { LM.chico.fitBounds(limitesZona(), { padding: [16, 16] }); LM.chico._ajustado = true; } } }).observe($('mapa'));
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (D && !document.documentElement.getAttribute('data-theme')) temaMapas(); });
+}
+function temaMapas() { for (const m of [LM.chico, LM.grande]) if (m) ponerBase(m); pintarMapas(); }
+function pintarMapas() { pintarChico(); pintarGrande(); }
+function colorPunto(g) {
+  const osc = oscuro();
+  if (visto(g)) return osc ? '#636366' : '#aeaeb2';
+  if (g.nuevo) return '#ff9f0a';
+  return osc ? '#f5f5f7' : '#1d1d1f';
+}
+function pintarChico() {
+  const m = LM.chico; if (!m) return;
+  m._capa.clearLayers();
+  const osc = oscuro(), orden = vigentes.slice().sort((a, b) => (sel === a) - (sel === b));
+  for (const g of orden) {
+    const p = pos(g); if (!p) continue;
+    const esSel = sel === g, conocido = g.e !== null;
+    const mk = L.circleMarker(p, { radius: esSel ? 9 : (conocido ? 6 : 4.5), color: esSel ? '#ffffff' : (osc ? '#1c1c1e' : '#ffffff'), weight: esSel ? 3 : 1.5, fillColor: esSel ? (osc ? '#0a84ff' : '#0071e3') : colorPunto(g), fillOpacity: conocido ? 1 : 0.55 }).addTo(m._capa);
+    mk.bindTooltip(etiqueta(g) + ' · ' + (conocido ? money(g.r + g.e) : 'alquiler ' + money(g.r)));
+    mk.on('click', () => elegir(g));
+  }
+}
+function pintarGrande() {
+  const m = LM.grande; if (!m || !$('dlg').open) return;
+  m._capa.clearLayers();
+  const conocidos = [], sueltos = [];
+  for (const g of vigentes) {
+    const p = pos(g); if (!p) continue;
+    if (g.e === null) { sueltos.push({ g, p }); continue; }
+    const q = m.latLngToContainerPoint(p);
+    conocidos.push({ g, p, x: q.x, y: q.y });
+  }
+  conocidos.sort((a, b) => (a.g.r + a.g.e) - (b.g.r + b.g.e));
+  // los avisos cuyos precios se taparían entre sí se juntan en uno solo (el más bajo) con un contador
+  const cs = [];
+  for (const q of conocidos) {
+    const c = cs.find(c => Math.abs(c.x - q.x) < 56 && Math.abs(c.y - q.y) < 30);
+    if (c) c.items.push(q.g); else cs.push({ x: q.x, y: q.y, p: q.p, items: [q.g] });
+  }
+  const osc = oscuro();
+  for (const q of sueltos) {
+    const esSel = sel === q.g;
+    const mk = L.circleMarker(q.p, { radius: esSel ? 9 : 5, color: esSel ? (osc ? '#0a84ff' : '#0071e3') : (osc ? '#a1a1a6' : '#6e6e73'), weight: 2.5, fillColor: osc ? '#1c1c1e' : '#ffffff', fillOpacity: 1 }).addTo(m._capa);
+    mk.bindTooltip(etiqueta(q.g) + ' · alquiler ' + money(q.g.r) + ', expensas sin publicar');
+    mk.on('click', () => elegirCelda({ items: [q.g] }));
+  }
+  for (const c of cs) {
+    const n = c.items.length, g0 = c.items[0], total = g0.r + g0.e, esSel = !!sel && c.items.includes(sel);
+    const clase = 'pill' + (esSel ? ' sel' : c.items.every(visto) ? ' visto' : c.items.some(g => g.nuevo) ? ' nuevo' : '');
+    const icon = L.divIcon({ className: 'pillwrap', html: '<div class="' + clase + '"><span>$' + Math.round(total / 1000) + 'k</span>' + (n > 1 ? '<i>' + n + '</i>' : '') + '</div>', iconSize: [0, 0] });
+    const mk = L.marker(c.p, { icon, title: etiqueta(g0) + ' · desde ' + money(total) + (n > 1 ? ' · ' + n + ' avisos' : ''), zIndexOffset: esSel ? 10000 : 5000 - Math.round(total / 1000) }).addTo(m._capa);
+    mk.on('click', () => elegirCelda(c));
+  }
+}
+function elegir(g) {
+  sel = g;
+  if (g.e === null) $('unk').open = true;
+  render();
+  const row = $('g' + g.i); if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function elegirCelda(c) { sel = c.items[0]; hojaItems = c.items; hoja(c.items); $('pista').hidden = true; pintarGrande(); }
+function hoja(items) {
+  const base = items[0];
+  const filas = items.map(g => {
+    const v = visto(g), conocido = g.e !== null;
+    return '<div class="ci' + (v ? ' visto' : '') + '" data-i="' + g.i + '"><span class="cd">Alquiler ' + money(g.r) + (conocido ? ' + expensas ' + money(g.e) : ' + expensas sin publicar') + '</span>' +
+      '<span class="ct">' + (conocido ? money(g.r + g.e) : 'desde ' + money(g.r)) + '</span>' +
+      '<div class="tags">' + capsulas(g, true) + '</div><div class="lnk">' + enlaces(g) + '</div>' + botonVisto(g, v) + '</div>';
+  }).join('');
+  const h = $('hoja');
+  h.innerHTML = '<div class="cab"><b>' + etiqueta(base) + '</b>' + (items.length > 1 ? '<span>' + items.length + ' avisos</span>' : '') + '<button class="x" type="button" id="hojaX" aria-label="Cerrar detalle">' + CERRAR + '</button></div>' + filas;
+  h.hidden = false;
+  $('hojaX').addEventListener('click', () => { sel = null; hojaItems = null; h.hidden = true; $('pista').hidden = false; pintarMapas(); });
+}
+function abrirMapa() {
+  if (!window.L) return;
+  const dlg = $('dlg');
+  if (!dlg.open) dlg.showModal();
+  requestAnimationFrame(() => {
+    if (!LM.grande) { LM.grande = crearMapa('mapaG', true); LM.grande.on('zoomend', pintarGrande); }
+    else LM.grande.invalidateSize();
+    pintarGrande();
+  });
+}
+window.addEventListener('resize', () => { if (LM.grande && $('dlg').open) { LM.grande.invalidateSize(); pintarGrande(); } });
+$('ampliar').addEventListener('click', abrirMapa);
+$('verMapa').addEventListener('click', abrirMapa);
+$('cerrar').addEventListener('click', () => $('dlg').close());
+</script>
+</body>
+</html>
