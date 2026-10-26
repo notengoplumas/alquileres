@@ -291,7 +291,7 @@ dialog[open] { display: flex; flex-direction: column; }
       </details>
       <div class="nota">
         <p>La ubicación sale de la calle y la altura publicada en cada aviso. En La Voz, cuando el aviso no trae dirección, se usa el punto que marcó quien lo publicó. Las alturas redondas (&ldquo;al 500&rdquo;) son aproximadas, y cerca del límite un aviso puede quedar de un lado o del otro.</p>
-        <p>Las expensas son las que figuran en cada aviso y no incluyen luz, agua ni impuestos. Un mismo departamento publicado en varios sitios aparece una sola vez. &ldquo;Nuevo&rdquo; marca lo que apareció en las últimas 48 horas. Lo que marcás como visto se guarda solo en este dispositivo.</p>
+        <p>Las expensas son las que figuran en cada aviso y no incluyen luz, agua ni impuestos. Un mismo departamento publicado en varios sitios aparece una sola vez. &ldquo;Nuevo&rdquo; marca lo que apareció en las últimas 48 horas. Lo que marcás como visto se comparte entre tus dispositivos.</p>
       </div>
     </main>
 
@@ -349,6 +349,10 @@ function leer(k, def) { try { const v = localStorage.getItem(k); return v ? JSON
 function guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
 let D = null, groups = [], NAMES = {}, FIT = {}, vistos = new Set(leer('alq-vistos', [])), sel = null, vigentes = [], hojaItems = null;
+// Los vistos se comparten entre dispositivos: cada aviso guarda [momento del cambio, 1 = visto | 0 = ya no visto] y gana el cambio más nuevo.
+const SYNC = 'https://alquileres-sync.notengoplumas.workers.dev/vistos?k=_ZlohwnvSAgZU8Q7kn8TXy-B';
+let cambios = leer('alq-cambios', {}), tSync = 0, sincronizando = false, otraVez = false;
+for (const k of vistos) if (!cambios[k]) cambios[k] = [1, 1];
 const mins = [500000, 550000, 600000, 650000], maxs = [650000, 700000, 750000, 800000];
 const LM = {};
 
@@ -393,7 +397,7 @@ function init(d) {
     $('aviso').appendChild(p);
   }
   armarGrupos(); armarFiltros();
-  iniciarMapas(); render();
+  iniciarMapas(); render(); sincronizar();
 }
 
 /* ---------- avisos repetidos: se muestran una sola vez ---------- */
@@ -424,7 +428,31 @@ function armarGrupos() {
   for (const g of groups) { if (g.p === undefined) g.p = null; g.nuevo = g.p !== null && Date.now() - g.p < H48; }
 }
 const visto = g => g.keys.some(k => vistos.has(k));
-function marcarVisto(g, v) { for (const k of g.keys) { if (v) vistos.add(k); else vistos.delete(k); } guardar('alq-vistos', [...vistos]); }
+function marcarVisto(g, v) {
+  const t = Date.now();
+  for (const k of g.keys) { cambios[k] = [t, v ? 1 : 0]; if (v) vistos.add(k); else vistos.delete(k); }
+  guardar('alq-vistos', [...vistos]); guardar('alq-cambios', cambios);
+  clearTimeout(tSync); tSync = setTimeout(sincronizar, 1500);
+}
+async function sincronizar() {
+  if (sincronizando) { otraVez = true; return; }
+  sincronizando = true;
+  try {
+    const r = await fetch(SYNC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cambios) });
+    if (!r.ok) throw new Error(r.status);
+    const remoto = await r.json();
+    let hubo = false;
+    for (const k in remoto) { const c = remoto[k], l = cambios[k]; if (!l || c[0] > l[0]) { cambios[k] = c; hubo = true; } }
+    if (hubo) {
+      vistos = new Set(Object.keys(cambios).filter(k => cambios[k][1]));
+      guardar('alq-vistos', [...vistos]); guardar('alq-cambios', cambios);
+      render(); if (hojaItems && $('dlg').open) hoja(hojaItems);
+    }
+  } catch (e) {}
+  sincronizando = false;
+  if (otraVez) { otraVez = false; sincronizar(); }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && D) sincronizar(); });
 function pos(g) {
   if (g.st !== '?' && FIT[g.st]) { const f = FIT[g.st]; return [f[0] + f[1] * g.n, f[2] + f[3] * g.n]; }
   return g.lat != null ? [g.lat, g.lng] : null;
