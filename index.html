@@ -81,6 +81,9 @@ h1 { margin: 0; font-family: var(--display); font-size: clamp(30px, 5.2vw, 44px)
 .estado .sello { font-weight: 600; color: var(--ink); }
 .fuente { display: inline-flex; align-items: center; gap: 6px; }
 .fuente::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #30b05a; }
+.estado a.ext { display: inline-flex; align-items: center; gap: 4px; color: var(--link); text-decoration: none; font-weight: 500; }
+.estado a.ext:hover { text-decoration: underline; }
+.estado a.ext svg { width: 11px; height: 11px; }
 .fuente.mal { color: var(--warn-ink); font-weight: 600; }
 .fuente.mal::before { background: var(--nuevo-fill); }
 .aviso { margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: var(--nuevo-bg); color: var(--nuevo-ink); font-size: 14px; }
@@ -327,6 +330,9 @@ const SRC = {
 const CHECK = '<svg viewBox="0 0 12 12" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.4 6.6l2.4 2.4 4.8-5.4"/></svg>';
 const FLECHA = '<svg viewBox="0 0 12 12" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8M2.8 6.8L6 10l3.2-3.2"/></svg>';
 const CERRAR = '<svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>';
+const FLECHA_EXT = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2.5H2.8a.8.8 0 0 0-.8.8v5.9c0 .44.36.8.8.8h5.9a.8.8 0 0 0 .8-.8V7.5M7 2h3v3M10 2L5.5 6.5"/></svg>';
+// Marketplace no se puede leer solo (pide iniciar sesión): el link abre la categoría con el rango de precio y 1 dormitorio.
+const urlMarketplace = (min, max) => 'https://www.facebook.com/marketplace/cordoba/propertyrentals?minPrice=' + (min - 150000) + '&maxPrice=' + max + '&minBedrooms=1&maxBedrooms=1&exact=false';
 const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format;
 const $ = id => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
@@ -353,7 +359,7 @@ let D = null, groups = [], NAMES = {}, FIT = {}, vistos = new Set(leer('alq-vist
 const SYNC = 'https://alquileres-sync.notengoplumas.workers.dev/vistos?k=_ZlohwnvSAgZU8Q7kn8TXy-B';
 let cambios = leer('alq-cambios', {}), tSync = 0, sincronizando = false, otraVez = false;
 for (const k of vistos) if (!cambios[k]) cambios[k] = [1, 1];
-const mins = [500000, 550000, 600000, 650000], maxs = [650000, 700000, 750000, 800000];
+const mins = [500000, 550000, 600000, 650000], maxs = [650000, 700000, 750000, 800000, 850000];
 const LM = {};
 
 /* ---------- tema ---------- */
@@ -389,6 +395,9 @@ function init(d) {
     if (!s.ok) falla = true;
     e.appendChild(c);
   }
+  const mk = document.createElement('a'); mk.id = 'mkt'; mk.className = 'ext'; mk.target = '_blank'; mk.rel = 'noopener';
+  mk.title = 'Abre Facebook Marketplace con tu rango de precio. Ahí se revisa a mano.';
+  mk.innerHTML = 'Marketplace' + FLECHA_EXT; e.appendChild(mk);
   const horas = (Date.now() - D.generado) / 3600000;
   $('aviso').textContent = '';
   if (horas > 14 || falla) {
@@ -462,11 +471,11 @@ function etiqueta(g) { return g.st === '?' ? 'Dirección no publicada' : (NAMES[
 /* ---------- filtros ---------- */
 function armarFiltros() {
   $('min').innerHTML = mins.map(v => '<option value="' + v + '"' + (v === 550000 ? ' selected' : '') + '>' + money(v) + '</option>').join('');
-  $('max').innerHTML = maxs.map(v => '<option value="' + v + '"' + (v === 750000 ? ' selected' : '') + '>' + money(v) + '</option>').join('');
+  $('max').innerHTML = maxs.map(v => '<option value="' + v + '"' + (v === 850000 ? ' selected' : '') + '>' + money(v) + '</option>').join('');
   const s = leer('alq-filtros2', null);
   if (s) {
     if (mins.includes(s.min)) $('min').value = s.min;
-    if (maxs.includes(s.max)) $('max').value = s.max;
+    if (maxs.includes(s.max)) $('max').value = (s.v === 2 || s.max !== 750000) ? s.max : 850000; // el tope viejo (750.000) pasa una vez a 850.000
     for (const id of ['nu', 'oc', 'bd', 'pa', 'sc']) if (id in s) $(id).checked = !!s[id];
     if (['t', 'n', 'r', 's'].includes(s.so)) $('so').value = s.so;
   }
@@ -497,7 +506,8 @@ function filaHtml(g, desconocido) {
 function render() {
   const min = +$('min').value, max = +$('max').value, o = {};
   for (const id of ['nu', 'oc', 'bd', 'pa', 'sc']) o[id] = $(id).checked;
-  guardar('alq-filtros2', Object.assign({ min, max, so: $('so').value }, o));
+  guardar('alq-filtros2', Object.assign({ v: 2, min, max, so: $('so').value }, o));
+  const mk = $('mkt'); if (mk) mk.href = urlMarketplace(min, max);
   const ok = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.nu || g.nuevo) && (!o.oc || !visto(g));
   const main = [], unk = [];
   groups.forEach((g, i) => {
