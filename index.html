@@ -300,7 +300,7 @@ details.mas > summary small { color: var(--ink2); font-weight: 400; font-size: 1
   <button type="button" id="zo" aria-label="Alejar"><svg viewBox="0 0 18 18" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 9h11"/></svg></button>
   <button type="button" id="zr" aria-label="Volver a ver toda la zona" title="Ver toda la zona"><svg viewBox="0 0 18 18" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="3.2"/><path d="M9 1.5v3M9 13.5v3M1.5 9h3M13.5 9h3"/></svg></button>
 </div>
-<div class="leyenda" id="leyenda"><span><i class="i-def"></i>Aviso</span><span><i class="i-nu"></i>Nuevo</span><span><i class="i-vi"></i>Visto</span><span>Precio total, el más bajo del edificio</span></div>
+<div class="leyenda" id="leyenda"><span><i class="i-def"></i>Aviso</span><span><i class="i-nu"></i>Nuevo</span><span><i class="i-vi"></i>Visto</span><span>Precio total del más barato de cada edificio</span><span>Punto: su precio aparece al acercar</span></div>
 <div class="hoja" id="hoja" hidden></div>
 
 <script>
@@ -459,9 +459,10 @@ function armarGrupos() {
   groups = [];
   for (const r of rows) {
     let g = groups.find(x => same(x, r));
-    if (!g) { g = { st: r.st, n: r.n, r: r.r, e: r.e, z: r.z, f: new Set(), src: [], keys: [], lat: r.lat, lng: r.lng, p: undefined, baja: 0 }; groups.push(g); }
+    if (!g) { g = { st: r.st, n: r.n, r: r.r, e: r.e, z: r.z, f: new Set(), src: [], keys: [], lat: r.lat, lng: r.lng, d: r.d || '', p: undefined, baja: 0 }; groups.push(g); }
     if (g.e === null && r.e !== null) g.e = r.e;
     if (r.z === 'i') g.z = 'i';
+    if (!g.d && r.d) g.d = r.d;
     if (g.n !== null && g.n % 100 === 0 && r.n !== null && r.n % 100 !== 0) g.n = r.n;
     for (const c of r.f) g.f.add(c);
     if (!g.src.some(x => x.s === r.s && x.id === r.id)) { g.src.push({ s: r.s, id: r.id }); g.keys.push(r.s + ':' + r.id); }
@@ -500,7 +501,7 @@ function pos(g) {
   if (g.st !== '?' && FIT[g.st]) { const f = FIT[g.st]; return [f[0] + f[1] * g.n, f[2] + f[3] * g.n]; }
   return g.lat != null ? [g.lat, g.lng] : null;
 }
-function etiqueta(g) { return g.st === '?' ? 'Dirección no publicada' : (NAMES[g.st] || g.st) + (g.n % 100 === 0 ? ' al ' : ' ') + g.n; }
+function etiqueta(g) { return g.st === '?' ? (g.d || 'Dirección no publicada') : (NAMES[g.st] || g.st) + (g.n % 100 === 0 ? ' al ' : ' ') + g.n; }
 
 /* ---------- filtros ---------- */
 function armarFiltros() {
@@ -524,7 +525,7 @@ function capsulas(g, corto) {
   if (g.z === 'b') t.push('<span class="tag">' + (corto ? 'Borde' : 'Borde de la zona') + '</span>');
   if (g.f.has('P')) t.push('<span class="tag">Particular</span>');
   if (g.f.has('S')) t.push('<span class="tag">Sin comisión</span>');
-  if (g.st === '?' && !corto) t.push('<span class="tag">Ubicación según el aviso</span>');
+  if (g.st === '?' && !g.d && !corto) t.push('<span class="tag">Ubicación según el aviso</span>');
   return t.join('');
 }
 const enlaces = g => g.src.map(x => '<a href="' + SRC[x.s][1](x.id) + '" target="_blank" rel="noopener" data-vis="1">' + SRC[x.s][0] + '</a>').join('');
@@ -634,37 +635,58 @@ function iniciarMapa() {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (D && !document.documentElement.getAttribute('data-theme')) temaMapa(); });
 }
 function temaMapa() { if (LM.m) ponerBase(LM.m); pintarMapa(); }
+// Un precio por edificio (misma dirección). Si dos precios se taparían entre sí, el más barato (o el nuevo) conserva su precio y el otro
+// queda como punto, que muestra el precio al pasar el mouse y aparece completo al acercar el mapa. Así no hay números de "agrupados".
 function pintarMapa() {
   const m = LM.m; if (!m) return;
   m._capa.clearLayers(); pastillas = [];
-  const conocidos = [], sueltos = [];
+  const edificios = new Map(), sueltos = [];
   for (const g of vigentes) {
     const p = pos(g); if (!p) continue;
     if (g.e === null) { sueltos.push({ g, p }); continue; }
-    const q = m.latLngToContainerPoint(p);
-    conocidos.push({ g, p, x: q.x, y: q.y });
+    const k = g.st !== '?' ? g.st + ':' + g.n : Math.round(p[0] * 8000) + ':' + Math.round(p[1] * 8000);
+    let b = edificios.get(k);
+    if (!b) { b = { p, items: [] }; edificios.set(k, b); }
+    b.items.push(g);
   }
-  conocidos.sort((a, b) => (a.g.r + a.g.e) - (b.g.r + b.g.e));
-  // los avisos cuyos precios se taparían entre sí se juntan en uno solo (el más bajo) con un contador
-  const cs = [];
-  for (const q of conocidos) {
-    const c = cs.find(c => Math.abs(c.x - q.x) < 64 && Math.abs(c.y - q.y) < 32);
-    if (c) c.items.push(q.g); else cs.push({ x: q.x, y: q.y, p: q.p, items: [q.g] });
+  const lista = [...edificios.values()].map(b => {
+    b.items.sort((x, y) => (x.r + x.e) - (y.r + y.e));
+    b.total = b.items[0].r + b.items[0].e;
+    b.sel = !!sel && b.items.includes(sel);
+    b.nuevo = b.items.some(g => g.nuevo);
+    b.vistos = b.items.every(visto);
+    const q = m.latLngToContainerPoint(b.p); b.x = q.x; b.y = q.y;
+    return b;
+  });
+  // quién conserva su precio a la vista: el elegido, después los nuevos, después los más baratos
+  lista.sort((a, b) => (b.sel - a.sel) || (b.nuevo - a.nuevo) || (a.total - b.total));
+  const ocupados = [], osc = oscuro();
+  for (const b of lista) {
+    const texto = '$' + Math.round(b.total / 1000) + 'k', n = b.items.length;
+    const ancho = 26 + texto.length * 8 + (n > 1 ? 30 : 0);
+    const caja = { x1: b.x - ancho / 2 - 3, x2: b.x + ancho / 2 + 3, y1: b.y - 40, y2: b.y + 2 };
+    const choca = ocupados.some(o => caja.x1 < o.x2 && caja.x2 > o.x1 && caja.y1 < o.y2 && caja.y2 > o.y1);
+    const titulo = etiqueta(b.items[0]) + ' · ' + money(b.total) + (n > 1 ? ' · ' + n + ' avisos en este edificio' : '');
+    if (choca && !b.sel) {
+      const relleno = b.vistos ? (osc ? '#636366' : '#aeaeb2') : b.nuevo ? '#ff9f0a' : (osc ? '#f5f5f7' : '#1d1d1f');
+      const mk = L.circleMarker(b.p, { radius: b.nuevo ? 6 : 5, color: osc ? '#1c1c1e' : '#ffffff', weight: 1.5, fillColor: relleno, fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
+      mk.bindTooltip(titulo);
+      mk.on('click', () => elegirCelda(b));
+      continue;
+    }
+    ocupados.push(caja);
+    const clase = 'pill' + (b.sel ? ' sel' : b.vistos ? ' visto' : b.nuevo ? ' nuevo' : '');
+    const icon = L.divIcon({ className: 'pillwrap', html: '<div class="' + clase + '"><span>' + texto + '</span>' + (n > 1 ? '<i title="' + (n - 1) + (n === 2 ? ' aviso más' : ' avisos más') + ' en este edificio">+' + (n - 1) + '</i>' : '') + '</div>', iconSize: [0, 0] });
+    const mk = L.marker(b.p, { icon, title: titulo, zIndexOffset: b.sel ? 10000 : 5000 - Math.round(b.total / 1000) }).addTo(m._capa);
+    mk.on('click', () => elegirCelda(b));
+    pastillas.push({ items: b.items, mk });
   }
-  const osc = oscuro();
+  const sinExpensas = osc ? '#a1a1a6' : '#6e6e73';
   for (const q of sueltos) {
     const esSel = sel === q.g;
-    const mk = L.circleMarker(q.p, { radius: esSel ? 9 : 5, color: esSel ? (osc ? '#0a84ff' : '#0071e3') : (osc ? '#a1a1a6' : '#6e6e73'), weight: 2.5, fillColor: osc ? '#1c1c1e' : '#ffffff', fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
+    const mk = L.circleMarker(q.p, { radius: esSel ? 9 : 5, color: esSel ? (osc ? '#0a84ff' : '#0071e3') : sinExpensas, weight: 2.5, fillColor: osc ? '#1c1c1e' : '#ffffff', fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
     mk.bindTooltip(etiqueta(q.g) + ' · alquiler ' + money(q.g.r) + ', expensas sin publicar');
     mk.on('click', () => elegirCelda({ items: [q.g] }));
-  }
-  for (const c of cs) {
-    const n = c.items.length, g0 = c.items[0], total = g0.r + g0.e, esSel = !!sel && c.items.includes(sel);
-    const clase = 'pill' + (esSel ? ' sel' : c.items.every(visto) ? ' visto' : c.items.some(g => g.nuevo) ? ' nuevo' : '');
-    const icon = L.divIcon({ className: 'pillwrap', html: '<div class="' + clase + '"><span>$' + Math.round(total / 1000) + 'k</span>' + (n > 1 ? '<i>' + n + '</i>' : '') + '</div>', iconSize: [0, 0] });
-    const mk = L.marker(c.p, { icon, title: etiqueta(g0) + ' · desde ' + money(total) + (n > 1 ? ' · ' + n + ' avisos' : ''), zIndexOffset: esSel ? 10000 : 5000 - Math.round(total / 1000) }).addTo(m._capa);
-    mk.on('click', () => elegirCelda(c));
-    pastillas.push({ items: c.items, mk });
   }
 }
 /* ---------- elegir un aviso ---------- */
@@ -684,22 +706,13 @@ function elegir(g) {
 }
 // tocar un precio del mapa: se abre la tarjeta con los avisos de ese punto y se marcan en la lista
 function elegirCelda(c) {
-  const m = LM.m;
-  if (c.items.length > 1 && m) {
-    const b = L.latLngBounds(c.items.map(pos).filter(Boolean));
-    if (b.isValid() && b.getSouthWest().distanceTo(b.getNorthEast()) > 25 && m.getZoom() < 18) {
-      const g = margenes();
-      m.fitBounds(b, { paddingTopLeft: [g.tl[0] + 30, g.tl[1] + 40], paddingBottomRight: [g.br[0] + 30, g.br[1] + 40], maxZoom: 18, animate: true });
-      return;
-    }
-  }
   sel = c.items[0]; hojaItems = c.items; hoja(c.items); marcarFilas();
   const r0 = $('g' + c.items[0].i); if (r0 && !esMovil()) r0.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   pintarMapa();
 }
 function hoja(items) {
   const h = $('hoja');
-  h.innerHTML = '<button class="x" type="button" id="hojaX" aria-label="Cerrar">' + CERRAR + '</button>' + '<div class="cab">' + items.length + (items.length === 1 ? ' aviso en este punto' : ' avisos en este punto') + '</div>' + items.map(g => filaHtml(g, g.e === null, true)).join('');
+  h.innerHTML = '<button class="x" type="button" id="hojaX" aria-label="Cerrar">' + CERRAR + '</button>' + '<div class="cab">' + items.length + (items.length === 1 ? ' aviso en este edificio' : ' avisos en este edificio') + '</div>' + items.map(g => filaHtml(g, g.e === null, true)).join('');
   h.hidden = false; document.body.classList.add('conhoja');
   $('hojaX').addEventListener('click', cerrarHoja);
 }
