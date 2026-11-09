@@ -454,7 +454,7 @@ h1 b { font-weight: 700; }
 .ptop { position: relative; padding: 22px 22px 0; }
 h1 { font-size: 28px; line-height: 1.02; letter-spacing: -0.035em; font-weight: 300; max-width: 200px; }
 h1 b { display: block; font-weight: 700; }
-.marca { position: absolute; right: 62px; top: 14px; width: 122px; height: 65px; filter: drop-shadow(0 6px 8px rgba(29, 43, 92, 0.22)); pointer-events: none; }
+.marca { position: absolute; right: 66px; top: 12px; width: 96px; height: 63px; filter: drop-shadow(0 6px 8px rgba(29, 43, 92, 0.22)); pointer-events: none; }
 .tema { position: absolute; top: 20px; right: 20px; background: var(--card); box-shadow: var(--sombra-card), var(--brillo); }
 .estado { margin-top: 12px; }
 .resumen h2 { font-weight: 300; font-size: 23px; letter-spacing: -0.03em; }
@@ -532,6 +532,26 @@ details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 2
   .hoja { animation-name: subir-m; border-radius: 26px; }
 }
 @media (prefers-reduced-motion: reduce) { .hoja { animation: none; } .row, .ubtn, .pill { transition: none; } }
+/* historial de precios en la tarjeta */
+details.hist { margin-top: 8px; border-radius: 14px; background: var(--chip); grid-column: 1 / -1; min-width: 0; }
+details.hist > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; font-size: 13px; font-weight: 500; }
+details.hist > summary::-webkit-details-marker { display: none; }
+details.hist > summary b { font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 980px; background: var(--accent-soft); }
+details.hist > summary b.baja { background: var(--baja-bg); color: var(--baja-ink); }
+details.hist > summary b.sube { background: var(--alto-bg); color: var(--alto-ink); }
+.hist-cuerpo { padding: 2px 12px 12px; }
+.hist-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--ink2); }
+.hist-cab b { font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.03em; }
+.hist-svg { display: block; width: 100%; height: auto; margin-top: 6px; color: var(--accent); }
+.hist-svg text { font-size: 10px; fill: var(--ink2); }
+.hist-svg .g { stroke: var(--line); stroke-dasharray: 3 4; stroke-width: 1; }
+.hist-res { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--ink2); }
+.hist-res b { white-space: nowrap; font-weight: 600; }
+.hist-res.baja b { color: var(--baja-ink); }
+.hist-res.sube b { color: var(--alto-ink); }
+.hist-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.hist-nums small { display: block; font-size: 11px; color: var(--ink2); }
+.hist-nums b { font-size: 14px; font-weight: 600; letter-spacing: -0.02em; }
 </style>
 </head>
 <body>
@@ -547,22 +567,25 @@ details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 2
   <div class="ptop" id="ptop">
     <div class="fila1">
       <h1>Alquileres en <b>Nueva Córdoba</b></h1>
-      <svg class="marca" viewBox="0 0 120 64" aria-hidden="true">
+      <svg class="marca" viewBox="0 0 100 66" aria-hidden="true">
         <defs>
-          <radialGradient id="gEsf" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color: var(--m1)"/><stop offset="0.45" style="stop-color: var(--m2)"/><stop offset="1" style="stop-color: var(--m3)"/></radialGradient>
-          <linearGradient id="gCap" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color: var(--mc1)"/><stop offset="0.5" style="stop-color: var(--mc2)"/><stop offset="1" style="stop-color: var(--mc3)"/></linearGradient>
-          <linearGradient id="gAro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3DD68F"/><stop offset="1" stop-color="#00A060"/></linearGradient>
+          <linearGradient id="gEd1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color: var(--mc1)"/><stop offset="0.55" style="stop-color: var(--mc2)"/><stop offset="1" style="stop-color: var(--mc3)"/></linearGradient>
+          <linearGradient id="gEd2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color: var(--m1)"/><stop offset="1" style="stop-color: var(--m2)"/></linearGradient>
+          <linearGradient id="gLlave" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2BD08B"/><stop offset="1" stop-color="#008A52"/></linearGradient>
         </defs>
-        <ellipse cx="60" cy="60" rx="56" ry="3" fill="rgba(29,43,92,0.16)"/>
-        <circle cx="20" cy="42" r="16" fill="url(#gEsf)"/>
-        <ellipse cx="14.5" cy="35.5" rx="5" ry="3.4" fill="rgba(255,255,255,0.34)"/>
-        <rect x="46" y="6" width="22" height="50" rx="11" fill="url(#gCap)"/>
-        <rect x="51" y="11" width="5" height="16" rx="2.5" fill="rgba(255,255,255,0.26)"/>
-        <ellipse cx="57" cy="30" rx="18" ry="6.5" fill="none" stroke="url(#gAro)" stroke-width="4"/>
-        <rect x="76" y="16" width="38" height="16" rx="8" transform="rotate(-24 95 24)" fill="url(#gCap)"/>
-        <rect x="81" y="19.5" width="13" height="4" rx="2" transform="rotate(-24 95 24)" fill="rgba(255,255,255,0.26)"/>
-        <circle cx="95" cy="46" r="10.5" fill="url(#gEsf)"/>
-        <ellipse cx="91.5" cy="42" rx="3.4" ry="2.4" fill="rgba(255,255,255,0.34)"/>
+        <ellipse cx="48" cy="62" rx="44" ry="3" fill="rgba(29,43,92,0.16)"/>
+        <rect x="6" y="28" width="26" height="32" rx="4" fill="url(#gEd2)"/>
+        <g fill="#F4E1DE" opacity="0.88"><rect x="11" y="34" width="6" height="6" rx="1.5"/><rect x="21" y="34" width="6" height="6" rx="1.5"/><rect x="11" y="44" width="6" height="6" rx="1.5"/><rect x="21" y="44" width="6" height="6" rx="1.5"/></g>
+        <rect x="68" y="20" width="26" height="40" rx="4" fill="url(#gEd2)"/>
+        <g fill="#F4E1DE" opacity="0.88"><rect x="73" y="26" width="6" height="6" rx="1.5"/><rect x="83" y="26" width="6" height="6" rx="1.5"/><rect x="73" y="36" width="6" height="6" rx="1.5"/><rect x="83" y="36" width="6" height="6" rx="1.5"/><rect x="73" y="46" width="6" height="6" rx="1.5"/></g>
+        <rect x="33" y="5" width="32" height="55" rx="5" fill="url(#gEd1)"/>
+        <rect x="36" y="8" width="4" height="30" rx="2" fill="rgba(255,255,255,0.16)"/>
+        <g fill="#F4E1DE" opacity="0.9"><rect x="38" y="12" width="6" height="6" rx="1.5"/><rect x="47" y="12" width="6" height="6" rx="1.5"/><rect x="56" y="12" width="6" height="6" rx="1.5"/><rect x="38" y="22" width="6" height="6" rx="1.5"/><rect x="47" y="22" width="6" height="6" rx="1.5"/><rect x="38" y="32" width="6" height="6" rx="1.5"/><rect x="56" y="32" width="6" height="6" rx="1.5"/><rect x="47" y="32" width="6" height="6" rx="1.5"/></g>
+        <g fill="#3DD68F"><rect x="56" y="22" width="6" height="6" rx="1.5"/></g>
+        <rect x="45" y="46" width="10" height="14" rx="2.5" fill="#F4E1DE" opacity="0.92"/>
+        <circle cx="84" cy="52" r="12.5" fill="url(#gLlave)"/>
+        <ellipse cx="79.5" cy="46.5" rx="4.5" ry="2.8" fill="rgba(255,255,255,0.3)"/>
+        <g transform="rotate(-35 84 52)" stroke="#ffffff" stroke-width="1.9" stroke-linecap="round" fill="none"><circle cx="79.6" cy="52" r="3.1"/><path d="M82.7 52h9M88.5 52v3M91.7 52v2.2"/></g>
       </svg>
       <button class="tema" id="tema" type="button" aria-label="Tema de la página" title="Tema"></button>
     </div>
@@ -829,7 +852,7 @@ function armarGrupos() {
   groups = [];
   for (const r of rows) {
     let g = groups.find(x => same(x, r));
-    if (!g) { g = { st: r.st, n: r.n, r: r.r, e: r.e, z: r.z, f: new Set(), src: [], keys: [], lat: r.lat, lng: r.lng, d: r.d || '', m: r.m || null, pi: r.pi != null ? r.pi : null, or: r.or || '', fc: r.fc || '', an: r.an != null ? r.an : null, x: new Set(), p: undefined, baja: 0 }; groups.push(g); }
+    if (!g) { g = { st: r.st, n: r.n, r: r.r, e: r.e, z: r.z, f: new Set(), src: [], keys: [], lat: r.lat, lng: r.lng, d: r.d || '', m: r.m || null, pi: r.pi != null ? r.pi : null, or: r.or || '', fc: r.fc || '', an: r.an != null ? r.an : null, x: new Set(), hist: null, p: undefined, baja: 0 }; groups.push(g); }
     if (g.e === null && r.e !== null) g.e = r.e;
     if (r.z === 'i') g.z = 'i';
     if (!g.d && r.d) g.d = r.d;
@@ -839,6 +862,7 @@ function armarGrupos() {
     if (!g.fc && r.fc) g.fc = r.fc;
     if (g.an === null && r.an != null) g.an = r.an;
     for (const c of (r.x || [])) g.x.add(c);
+    if (r.h && (!g.hist || r.h.length > g.hist.length)) g.hist = r.h;
     if (g.n !== null && g.n % 100 === 0 && r.n !== null && r.n % 100 !== 0) g.n = r.n;
     for (const c of r.f) g.f.add(c);
     if (!g.src.some(x => x.s === r.s && x.id === r.id)) { g.src.push({ s: r.s, id: r.id }); g.keys.push(r.s + ':' + r.id); }
@@ -1272,6 +1296,41 @@ function entornoHtml(g) {
     '<details class="ent-det"><summary>Ver detalle</summary>' + entornoBase(g) + (lug ? '<div class="ent">' + lug + '</div>' : '') + (sol ? '<div class="ent">' + sol + '</div>' : '') + '</details>';
 }
 
+/* ---------- historial de precios ---------- */
+// Serie de alquileres que el programa fue anotando desde que sigue el aviso (no desde que se publicó). Se muestra en la tarjeta del edificio.
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const fechaCorta = t => { const d = new Date(t); return d.getDate() + ' ' + MESES[d.getMonth()]; };
+const fechaLarga = t => { const d = new Date(t); return d.getDate() + ' ' + MESES[d.getMonth()] + ' ' + d.getFullYear(); };
+const miles = v => '$' + Math.round(v / 1000) + 'K';
+const pct = x => Math.abs(x).toFixed(1).replace('.', ',') + '%';
+function histSvg(h) {
+  const W = 360, H = 150, L = 44, R = 12, T = 12, B = 24, n = h.length;
+  const t0 = h[0][0], t1 = Math.max(h[n - 1][0], t0 + 864e5), vs = h.map(p => p[1]);
+  let lo = Math.min(...vs), hi = Math.max(...vs); const pad = Math.max(10000, (hi - lo) * 0.18); lo -= pad; hi += pad;
+  const X = t => L + (t - t0) / (t1 - t0) * (W - L - R), Y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  const pts = h.map(p => [X(p[0]), Y(p[1])]);
+  // el precio se mantiene hasta el cambio siguiente: la línea sube o baja en escalón y llega hasta hoy
+  let d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+  for (let i = 1; i < n; i++) d += ' L' + pts[i][0].toFixed(1) + ' ' + pts[i - 1][1].toFixed(1) + ' L' + pts[i][0].toFixed(1) + ' ' + pts[i][1].toFixed(1);
+  const fin = X(Date.now() > t1 ? t1 : t1);
+  d += ' L' + fin.toFixed(1) + ' ' + pts[n - 1][1].toFixed(1);
+  const area = d + ' L' + fin.toFixed(1) + ' ' + (H - B) + ' L' + pts[0][0].toFixed(1) + ' ' + (H - B) + ' Z';
+  const marcas = [hi - pad, (hi + lo) / 2, lo + pad].map(v => '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" class="g"/><text x="' + (L - 6) + '" y="' + (Y(v) + 3).toFixed(1) + '" text-anchor="end">' + miles(v) + '</text>').join('');
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="hist-svg" role="img" aria-label="Evolución del alquiler"><defs><linearGradient id="gHist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0.28"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>' +
+    marcas + '<path d="' + area + '" fill="url(#gHist)"/><path d="' + d + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>' +
+    pts.map(p => '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.4" fill="currentColor"/>').join('') +
+    '<text x="' + L + '" y="' + (H - 6) + '" text-anchor="start">' + fechaCorta(t0) + '</text>' + (n > 2 ? '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + fechaCorta(h[Math.floor(n / 2)][0]) + '</text>' : '') + '<text x="' + (W - R) + '" y="' + (H - 6) + '" text-anchor="end">' + fechaCorta(t1) + '</text></svg>';
+}
+function histHtml(g) {
+  const h = g.hist; if (!h || h.length < 2) return '';
+  const ini = h[0][1], act = h[h.length - 1][1], dif = act - ini, p = dif / ini * 100, baja = dif < 0;
+  const resumen = dif === 0 ? 'Mismo precio que al principio' : (baja ? 'Bajó ' : 'Subió ') + pct(p);
+  return '<details class="hist"><summary><span>Historial de precios</span><b class="' + (dif === 0 ? '' : baja ? 'baja' : 'sube') + '">' + (dif === 0 ? '=' : baja ? '↓ ' : '↑ ') + (dif === 0 ? '' : pct(p)) + '</b></summary>' +
+    '<div class="hist-cuerpo"><div class="hist-cab"><span>Evolución del alquiler desde que se sigue el aviso</span><b>' + money(act) + '</b></div>' + histSvg(h) +
+    '<div class="hist-res ' + (baja ? 'baja' : dif ? 'sube' : '') + '"><span>' + resumen + ' · ' + fechaLarga(h[0][0]) + ' – ' + fechaLarga(h[h.length - 1][0]) + '</span><b>' + (dif ? (dif < 0 ? '−' : '+') + money(Math.abs(dif)) + ' (' + (dif < 0 ? '−' : '+') + pct(p) + ')' : '') + '</b></div>' +
+    '<div class="hist-nums"><div><small>Primer precio visto</small><b>' + money(ini) + '</b></div><div><small>Precio actual</small><b>' + money(act) + '</b></div><div><small>Cambios de precio</small><b>' + (h.length - 1) + '</b></div></div></div></details>';
+}
+
 /* ---------- lista ---------- */
 function capsulas(g) {
   const t = [];
@@ -1298,7 +1357,7 @@ function filaHtml(g, desconocido, enHoja, sinTitulo) {
   const sub = desconocido ? '+ expensas sin publicar' : num(g.r) + ' + ' + num(g.e) + ' exp.';
   return '<div class="row' + (v ? ' visto' : '') + (resaltada && !enHoja ? ' sel' : '') + '" data-i="' + g.i + '"' + (enHoja ? '' : ' id="g' + g.i + '"') + '>' +
     '<div class="main">' + (sinTitulo ? '' : '<div class="ttl">' + etiqueta(g) + '</div>') + datosFila(g, !!enHoja) + '<div class="tags">' + capsulas(g) + '</div><div class="pie">' + enlaces(g) + pieTexto(g, !!enHoja) + '</div></div>' +
-    '<div class="side"><div class="tot">' + tot + '</div><div class="sub">' + sub + '</div>' + botonVisto(g, v) + '</div></div>';
+    '<div class="side"><div class="tot">' + tot + '</div><div class="sub">' + sub + '</div>' + botonVisto(g, v) + '</div>' + (enHoja ? histHtml(g) : '') + '</div>';
 }
 function render() {
   const min = +$('min').value, max = +$('max').value, o = {};
@@ -1486,9 +1545,12 @@ function elegirCelda(c) {
 }
 function hoja(items) {
   const h = $('hoja'), g0 = items[0];
+  const histAbiertos = [...h.querySelectorAll('details.hist')].map(d => d.open);
   h.innerHTML = '<button class="x" type="button" id="hojaX" aria-label="Cerrar">' + CERRAR + '</button>' +
     '<div class="cab2"><b>' + etiqueta(g0) + '</b><span>' + (items.length === 1 ? '1 aviso' : items.length + ' avisos') + '</span></div>' +
     entornoHtml(g0) + items.map(g => filaHtml(g, g.e === null, true, etiqueta(g) === etiqueta(g0))).join('');
+  const hs = h.querySelectorAll('details.hist');
+  if (hs.length === histAbiertos.length) hs.forEach((d, i) => { if (histAbiertos[i]) d.open = true; });
   h.hidden = false; document.body.classList.add('conhoja');
   $('hojaX').addEventListener('click', cerrarHoja);
 }
@@ -1497,6 +1559,8 @@ function cerrarHoja() {
   marcarFilas(); pintarMapa();
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && (hojaItems || sel)) cerrarHoja(); });
+// al abrir el historial, la hoja se desplaza para que el gráfico quede entero a la vista
+$('hoja').addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.hist') && d.open) setTimeout(() => d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30); }, true);
 </script>
 </body>
 </html>
