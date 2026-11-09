@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F4E1DE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1530" media="(prefers-color-scheme: dark)">
 <title>Alquileres Nueva Córdoba</title>
 <script>
 // Aplica el tema elegido antes de pintar, para que no parpadee.
@@ -17,7 +19,7 @@
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 /* Dirección: el mapa es la pantalla. Una hoja de vidrio con la lista flota encima (a la izquierda en la compu, abajo en el celu).
    Apple: gris/blanco/negro, un solo azul para acciones y selección, naranja = nuevo, verde = bajó de precio.
@@ -91,9 +93,6 @@ h1 { margin: 0; font-family: var(--display); font-size: 21px; line-height: 1.15;
 .fuentes li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #30b05a; flex: none; }
 .fuentes li.mal { color: var(--warn-ink); font-weight: 600; }
 .fuentes li.mal::before { background: var(--nuevo-fill); }
-a.chip-link { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 6px 14px; border-radius: 980px; border: 1px solid var(--line); color: var(--link); font-size: 13.5px; font-weight: 500; white-space: nowrap; }
-a.chip-link:hover { text-decoration: none; background: var(--accent-soft); }
-a.chip-link svg { width: 11px; height: 11px; }
 .aviso { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: var(--nuevo-bg); color: var(--nuevo-ink); font-size: 13.5px; }
 
 .filtros { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 12px; }
@@ -111,7 +110,6 @@ select:hover { border-color: var(--line); }
 
 .resumen { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; padding: 16px 20px 12px; }
 .resumen h2 { margin: 0; font-family: var(--display); font-size: 19px; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }
-.resumen p { margin: 0; grid-column: 1 / -1; color: var(--ink2); font-size: 13px; }
 #so { max-width: 140px; background-color: transparent; color: var(--link); padding-left: 4px; font-size: 13px; text-overflow: ellipsis; }
 #so:hover { border-color: transparent; text-decoration: underline; }
 
@@ -122,8 +120,6 @@ select:hover { border-color: var(--line); }
 .row:hover { background: var(--accent-soft); }
 .row.sel { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
 .ttl { font-size: 16px; font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; overflow-wrap: anywhere; }
-.det { color: var(--ink2); font-size: 13.5px; margin-top: 2px; }
-.det span { white-space: nowrap; }
 .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 7px; }
 .tags:empty { display: none; }
 .cap { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 980px; font-size: 12px; font-weight: 600; line-height: 1.5; letter-spacing: 0; }
@@ -131,8 +127,6 @@ select:hover { border-color: var(--line); }
 .cap.baja { background: var(--baja-bg); color: var(--baja-ink); }
 .cap svg { width: 10px; height: 10px; stroke: currentColor; }
 .tag { font-size: 12.5px; color: var(--ink2); }
-.lnk { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 13.5px; }
-.lnk a { font-weight: 500; }
 .side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px; }
 .tot { font-size: 19px; font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
 .tot small { display: block; font-size: 11.5px; font-weight: 400; color: var(--ink2); letter-spacing: 0; margin-bottom: 1px; }
@@ -166,12 +160,10 @@ details.mas > summary small { color: var(--ink2); font-weight: 400; font-size: 1
 
 /* tarjeta del punto elegido en el mapa */
 .hoja { position: fixed; z-index: 30; bottom: 22px; left: calc(var(--panel-w) + 24px + (100vw - var(--panel-w) - 24px) / 2); transform: translateX(-50%); width: min(460px, calc(100vw - var(--panel-w) - 64px)); max-height: 58dvh; overflow-y: auto; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(26px); backdrop-filter: saturate(180%) blur(26px); border-radius: 22px; box-shadow: var(--shadow), 0 0 0 1px var(--glass-line); overscroll-behavior: contain; }
-.hoja .cab { padding: 14px 52px 4px 20px; font-size: 13px; color: var(--ink2); font-weight: 500; }
 .hoja .x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--chip); cursor: pointer; display: grid; place-items: center; z-index: 2; }
 .hoja .x svg { width: 12px; height: 12px; stroke: var(--ink2); }
 .hoja .row { cursor: default; }
 .hoja .row:hover { background: transparent; }
-.hoja .cab + .row::before { display: none; }
 
 .datos { color: var(--ink2); font-size: 13px; margin-top: 3px; display: flex; flex-wrap: wrap; gap: 0 10px; font-variant-numeric: tabular-nums; }
 .datos span + span::before { content: "·"; margin-right: 10px; }
@@ -189,14 +181,8 @@ details.mas > summary small { color: var(--ink2); font-weight: 400; font-size: 1
 .ent-s { margin-top: 3px; color: var(--ink2); font-size: 13px; }
 .ent-c { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 12.5px; color: var(--ink2); }
 .ent-c .ent-k { color: var(--ink); font-weight: 500; }
-.hoja .cab + .ent { border-bottom: 1px solid var(--line); }
 
 /* tiempo a un lugar */
-.fila.lugar { gap: 8px; flex-wrap: wrap; }
-.lugar-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 6px 14px; border-radius: 980px; border: 1px dashed var(--line2); background: transparent; color: var(--link); font-size: 14px; font-weight: 500; cursor: pointer; max-width: 100%; white-space: nowrap; }
-.lugar-btn svg { width: 15px; height: 15px; flex: none; }
-.lugar-btn.activo { border-style: solid; border-color: transparent; background: var(--accent-soft); color: var(--accent); }
-.fila.lugar select { flex: 0 1 auto; }
 .lugar-pop { padding: 10px; border-radius: 16px; background: var(--chip); }
 .lp-item { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .lp-item > button:first-child { flex: 1; min-width: 0; text-align: left; border: 0; background: transparent; padding: 7px 10px; border-radius: 10px; cursor: pointer; font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -274,10 +260,6 @@ body.eligiendo .leaflet-container { cursor: crosshair; }
   .leyenda { display: none; }
   .topbar { display: flex; position: fixed; z-index: 18; top: max(10px, env(safe-area-inset-top, 0px)); left: 0; right: 0; padding: 2px 12px 6px; overflow-x: auto; scrollbar-width: none; }
   .topbar::-webkit-scrollbar { display: none; }
-  .topbar .chips { flex-wrap: nowrap; }
-  .topbar .chip span { background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--glass-line); }
-  .topbar .chip input:checked + span { background: var(--chip-on); }
-  .topbar a.chip-link { background: var(--glass); border-color: transparent; -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--glass-line); }
   .panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; height: calc(168px + env(safe-area-inset-bottom, 0px)); border-radius: 22px 22px 0 0; transition: height 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .panel[data-estado="half"] { height: 56dvh; }
   .panel[data-estado="full"] { height: calc(100dvh - 52px); }
@@ -302,10 +284,260 @@ body.eligiendo .leaflet-container { cursor: crosshair; }
   body.conhoja .panel { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .panel, .pill { transition: none; } }
+
+/* ===== v2: más claro, menos filas de controles y tarjeta con resumen ===== */
+.estado { margin-top: 4px; }
+.filtros { padding: 12px 20px 0; gap: 10px; }
+.fila .lab { min-width: 34px; }
+/* qué avisos ver: pestañas con contador */
+.tabs { display: flex; padding: 3px; background: var(--chip); border-radius: 980px; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { flex: 1 0 auto; display: inline-flex; align-items: baseline; justify-content: center; gap: 5px; border: 0; background: transparent; padding: 6px 12px; min-height: 32px; border-radius: 980px; font-size: 13.5px; font-weight: 500; color: var(--ink2); cursor: pointer; white-space: nowrap; }
+.tabs button b { font-weight: 600; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.tabs button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18); }
+/* tres botones: lugar, filtros, otros sitios */
+.util { display: flex; gap: 8px; }
+.ubtn { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 10px; border-radius: 980px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 13.5px; font-weight: 500; cursor: pointer; white-space: nowrap; overflow: hidden; }
+.ubtn svg { width: 15px; height: 15px; flex: none; }
+.ubtn .t { overflow: hidden; text-overflow: ellipsis; }
+.ubtn .n { min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px; display: grid; place-items: center; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; flex: none; }
+.ubtn:hover { background: var(--accent-soft); }
+.ubtn[aria-expanded="true"], .ubtn.on { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+.pop { padding: 12px; border-radius: 16px; background: var(--chip); display: grid; gap: 10px; }
+.pop-t { font-size: 12.5px; font-weight: 600; color: var(--ink2); }
+.pop .chip span { background: var(--surface); }
+.pop .chip input:checked + span { background: var(--chip-on); }
+.otro { display: grid; gap: 1px; padding: 8px 10px; border-radius: 12px; color: var(--ink); }
+.otro:hover { background: var(--accent-soft); text-decoration: none; }
+.otro b { font-size: 14px; font-weight: 600; color: var(--link); }
+.otro span { font-size: 12.5px; color: var(--ink2); }
+.lugar-opts { display: flex; gap: 8px; }
+.lugar-opts select { flex: 1 1 0; min-width: 0; background-color: var(--surface); }
+/* lista: dirección, datos clave y total; lo demás en segundo plano */
+.row { content-visibility: auto; contain-intrinsic-size: auto 132px; }
+.hoja .row { content-visibility: visible; }
+.side { align-items: flex-end; justify-content: flex-start; gap: 2px; }
+.tot small { display: inline; margin: 0 4px 0 0; font-size: 12px; }
+.sub { font-size: 12px; color: var(--ink2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.side .vb { margin-top: auto; }
+.pie { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 12px; margin-top: 8px; font-size: 13px; color: var(--ink2); }
+.pie a { font-weight: 500; }
+/* tarjeta del edificio: resumen en cuatro datos y detalle plegado */
+.cab2 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 52px 6px 20px; }
+.cab2 b { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.cab2 span { color: var(--ink2); font-size: 13px; white-space: nowrap; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; padding: 6px 20px 10px; }
+.tile { background: var(--chip); border-radius: 14px; padding: 9px 11px; min-width: 0; }
+.tile small { display: block; font-size: 11.5px; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile b.alto { color: var(--alto-ink); }
+.tile b.medio { color: var(--nuevo-ink); }
+.tile b.bajo { color: var(--baja-ink); }
+details.ent-det > summary { cursor: pointer; list-style: none; padding: 2px 20px 10px; color: var(--link); font-size: 13.5px; font-weight: 500; }
+details.ent-det > summary::-webkit-details-marker { display: none; }
+details.ent-det > summary::after { content: ""; display: inline-block; width: 5px; height: 5px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg) translateY(-2px); margin-left: 7px; transition: transform 0.2s; }
+details.ent-det[open] > summary::after { transform: rotate(-135deg) translateY(-2px); }
+.hoja > .ent-det[open] { border-bottom: 1px solid var(--line); }
+.hoja .row .main > .ttl:first-child { margin-top: 0; }
+.leyenda { gap: 4px 14px; }
+@media (max-width: 979px) {
+  .ubtn { font-size: 13px; padding: 6px 8px; gap: 5px; }
+  .topbar .tabs { flex: 1 1 auto; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--glass-line); }
+  .topbar .tabs button { padding: 6px 11px; }
+  .panel { height: calc(214px + env(safe-area-inset-bottom, 0px)); }
+  .panel[data-estado="half"] { height: 56dvh; }
+  .panel[data-estado="full"] { height: calc(100dvh - 52px); }
+}
+.lugar-linea { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hoja .lugar-linea { white-space: normal; }
+/* ===== paleta: rosa niebla #F4E1DE, azul tinta #1D2B5C y esmeralda #00A060 =====
+   Rosa = lienzo, azul = texto y controles, esmeralda = lo nuevo y lo que se puede hacer. El modo oscuro es el mismo mundo al revés: azul tinta de fondo y texto rosa. */
+:root {
+  --rosa: #F4E1DE; --azul: #1D2B5C; --verde: #00A060;
+  --bg: #F4E1DE; --surface: #FBF3F1; --surface2: #EFD9D5; --ink: #1D2B5C; --ink2: #5A6285; --line: #E2C9C4; --line2: #8B8FA9;
+  --accent: #1D2B5C; --accent-ink: #F4E1DE; --link: #1D2B5C; --accent-soft: rgba(29, 43, 92, 0.09);
+  --nuevo-bg: rgba(0, 160, 96, 0.15); --nuevo-ink: #006B45; --nuevo-fill: #00A060; --nuevo-fill-ink: #ffffff;
+  --baja-bg: rgba(0, 160, 96, 0.15); --baja-ink: #006B45; --warn-ink: #9B1C1C; --alto-bg: #F6CFCA; --alto-ink: #9B1C1C;
+  --chip: #EBD3CF; --chip-ink: #1D2B5C; --chip-on: #1D2B5C; --chip-on-ink: #F4E1DE;
+  --pill: #ffffff; --pill-ink: #1D2B5C; --visto-fill: #E6D3D0; --visto-ink: #8A8FA9;
+  --glass: rgba(244, 225, 222, 0.88); --glass-line: rgba(29, 43, 92, 0.1);
+  --shadow: 0 1px 2px rgba(29, 43, 92, 0.1), 0 12px 32px rgba(29, 43, 92, 0.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1530; --surface: #1D2B5C; --surface2: #162250; --ink: #F4E1DE; --ink2: #B9B6CC; --line: #33417A; --line2: #7C85B0;
+    --accent: #F4E1DE; --accent-ink: #1D2B5C; --link: #F4E1DE; --accent-soft: rgba(244, 225, 222, 0.14);
+    --nuevo-bg: rgba(0, 160, 96, 0.25); --nuevo-ink: #5FE0AB; --nuevo-fill: #00A060; --nuevo-fill-ink: #ffffff;
+    --baja-bg: rgba(0, 160, 96, 0.25); --baja-ink: #5FE0AB; --warn-ink: #FF9C95; --alto-bg: rgba(255, 120, 110, 0.22); --alto-ink: #FF9C95;
+    --chip: #2B3A78; --chip-ink: #F4E1DE; --chip-on: #F4E1DE; --chip-on-ink: #1D2B5C;
+    --pill: #2B3A78; --pill-ink: #F4E1DE; --visto-fill: #162250; --visto-ink: #8A93C0;
+    --glass: rgba(18, 27, 66, 0.86); --glass-line: rgba(244, 225, 222, 0.12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.5); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1530; --surface: #1D2B5C; --surface2: #162250; --ink: #F4E1DE; --ink2: #B9B6CC; --line: #33417A; --line2: #7C85B0;
+  --accent: #F4E1DE; --accent-ink: #1D2B5C; --link: #F4E1DE; --accent-soft: rgba(244, 225, 222, 0.14);
+  --nuevo-bg: rgba(0, 160, 96, 0.25); --nuevo-ink: #5FE0AB; --nuevo-fill: #00A060; --nuevo-fill-ink: #ffffff;
+  --baja-bg: rgba(0, 160, 96, 0.25); --baja-ink: #5FE0AB; --warn-ink: #FF9C95; --alto-bg: rgba(255, 120, 110, 0.22); --alto-ink: #FF9C95;
+  --chip: #2B3A78; --chip-ink: #F4E1DE; --chip-on: #F4E1DE; --chip-on-ink: #1D2B5C;
+  --pill: #2B3A78; --pill-ink: #F4E1DE; --visto-fill: #162250; --visto-ink: #8A93C0;
+  --glass: rgba(18, 27, 66, 0.86); --glass-line: rgba(244, 225, 222, 0.12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.5); color-scheme: dark;
+}
+h1 { font-weight: 400; letter-spacing: -0.03em; }
+h1 b { font-weight: 700; }
+.cap.nuevo { background: var(--verde); color: #ffffff; }
+.cap.bueno { background: var(--accent-soft); color: var(--ink); }
+.nivel.bajo { background: var(--baja-bg); color: var(--baja-ink); }
+.nivel.medio { background: var(--accent-soft); color: var(--ink); }
+.nivel.si { background: rgba(255, 204, 0, 0.3); color: #6B5200; }
+.nivel.no { background: var(--chip); color: var(--ink2); }
+:root[data-theme="dark"] .nivel.si { color: #FFD84D; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .nivel.si { color: #FFD84D; } }
+.tile b.bajo { color: var(--baja-ink); }
+.tile b.medio { color: var(--ink); }
+.punto, .fuentes li::before { background: var(--verde); }
+.punto.mal, .fuentes li.mal::before { background: var(--warn-ink); }
+.aviso { background: var(--alto-bg); color: var(--alto-ink); }
+.pill.sel { background: var(--accent); color: var(--accent-ink); }
+.pill.sel i { background: var(--accent-ink); color: var(--accent); }
+.vb[aria-pressed="true"] .o { background: var(--verde); border-color: var(--verde); }
+.ubtn .n { background: var(--verde); color: #ffffff; }
+#lpForm button { background: var(--verde); color: #ffffff; font-weight: 600; }
+.lugar-pin { background: var(--verde); }
+.sombras-lienzo { opacity: 0.3; }
+.leyenda i.i-def { background: var(--ink); }
+/* ===== volumen: tarjetas con sombra, objetos con brillo y una tarjeta azul que resalta sobre el rosa ===== */
+:root {
+  --panel-bg: linear-gradient(180deg, rgba(252, 240, 237, 0.88) 0%, rgba(244, 225, 222, 0.8) 100%);
+  --card: #FDF7F5; --card-line: rgba(29, 43, 92, 0.06);
+  --sombra-card: 0 1px 2px rgba(29, 43, 92, 0.07), 0 8px 20px rgba(29, 43, 92, 0.08);
+  --sombra-card-hover: 0 2px 4px rgba(29, 43, 92, 0.09), 0 14px 30px rgba(29, 43, 92, 0.15);
+  --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --campo: rgba(255, 255, 255, 0.6);
+  --on-bg: linear-gradient(180deg, #3A4C94 0%, #1D2B5C 100%); --on-ink: #F4E1DE;
+  --pill-hi: #ffffff; --pill: #F6E8E5; --sel-hi: #3A4C94;
+  --m1: #7A8CD0; --m2: #2B3C7E; --m3: #141D45; --mc1: #4357A0; --mc2: #1D2B5C; --mc3: #121A3E;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --panel-bg: linear-gradient(180deg, rgba(30, 43, 96, 0.9) 0%, rgba(15, 23, 56, 0.9) 100%);
+    --card: rgba(255, 255, 255, 0.06); --card-line: rgba(255, 255, 255, 0.08);
+    --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 22px rgba(0, 0, 0, 0.3);
+    --sombra-card-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 34px rgba(0, 0, 0, 0.45);
+    --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --campo: rgba(255, 255, 255, 0.08);
+    --on-bg: linear-gradient(180deg, #FBEEEB 0%, #F4E1DE 100%); --on-ink: #1D2B5C;
+    --pill-hi: #3A4C94; --pill: #2B3A78; --sel-hi: #FFF3F0;
+    --m1: #9AA9E6; --m2: #4A5CA8; --m3: #26336F; --mc1: #6D80C8; --mc2: #3B4C92; --mc3: #26336F;
+  }
+}
+:root[data-theme="dark"] {
+  --panel-bg: linear-gradient(180deg, rgba(30, 43, 96, 0.9) 0%, rgba(15, 23, 56, 0.9) 100%);
+  --card: rgba(255, 255, 255, 0.06); --card-line: rgba(255, 255, 255, 0.08);
+  --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 22px rgba(0, 0, 0, 0.3);
+  --sombra-card-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 34px rgba(0, 0, 0, 0.45);
+  --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --campo: rgba(255, 255, 255, 0.08);
+  --on-bg: linear-gradient(180deg, #FBEEEB 0%, #F4E1DE 100%); --on-ink: #1D2B5C;
+  --pill-hi: #3A4C94; --pill: #2B3A78; --sel-hi: #FFF3F0;
+  --m1: #9AA9E6; --m2: #4A5CA8; --m3: #26336F; --mc1: #6D80C8; --mc2: #3B4C92; --mc3: #26336F;
+}
+/* bruma de color sobre el mapa, del lado de la hoja, para que todo se sienta de una pieza */
+.velo { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(900px 720px at 0% 42%, rgba(244, 225, 222, 0.5), transparent 70%), radial-gradient(700px 460px at 100% 100%, rgba(29, 43, 92, 0.1), transparent 72%); }
+:root[data-theme="dark"] .velo { background: radial-gradient(900px 720px at 0% 42%, rgba(60, 80, 170, 0.22), transparent 70%), radial-gradient(700px 460px at 100% 100%, rgba(0, 160, 96, 0.07), transparent 72%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .velo { background: radial-gradient(900px 720px at 0% 42%, rgba(60, 80, 170, 0.22), transparent 70%), radial-gradient(700px 460px at 100% 100%, rgba(0, 160, 96, 0.07), transparent 72%); } }
+/* la hoja */
+.panel { border-radius: 28px; background: var(--panel-bg); box-shadow: 0 2px 4px rgba(29, 43, 92, 0.08), 0 24px 60px rgba(29, 43, 92, 0.24), var(--brillo), 0 0 0 1px var(--glass-line); }
+/* título grande, fino y negrita, y los tres objetos de la marca */
+.ptop { position: relative; padding: 22px 22px 0; }
+h1 { font-size: 28px; line-height: 1.02; letter-spacing: -0.035em; font-weight: 300; max-width: 200px; }
+h1 b { display: block; font-weight: 700; }
+.marca { position: absolute; right: 62px; top: 14px; width: 122px; height: 65px; filter: drop-shadow(0 6px 8px rgba(29, 43, 92, 0.22)); pointer-events: none; }
+.tema { position: absolute; top: 20px; right: 20px; background: var(--card); box-shadow: var(--sombra-card), var(--brillo); }
+.estado { margin-top: 12px; }
+.resumen h2 { font-weight: 300; font-size: 23px; letter-spacing: -0.03em; }
+.resumen h2 b { font-weight: 700; }
+/* controles con relieve */
+select { background-color: var(--campo); box-shadow: 0 1px 2px rgba(29, 43, 92, 0.08), var(--brillo); }
+.tabs { box-shadow: inset 0 1px 3px rgba(29, 43, 92, 0.14); }
+.tabs button { transition: background-color 0.2s, box-shadow 0.2s, color 0.2s; }
+.tabs button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 2px rgba(29, 43, 92, 0.2), 0 5px 12px rgba(29, 43, 92, 0.12), var(--brillo); }
+.ubtn { background: var(--card); border-color: var(--card-line); box-shadow: var(--sombra-card), var(--brillo); transition: transform 0.15s, box-shadow 0.15s; }
+.ubtn:hover { background: var(--card); transform: translateY(-1px); box-shadow: var(--sombra-card-hover), var(--brillo); }
+.ubtn:active { transform: translateY(0) scale(0.98); }
+.ubtn[aria-expanded="true"], .ubtn.on { background: var(--on-bg); color: var(--on-ink); border-color: transparent; box-shadow: 0 8px 18px rgba(29, 43, 92, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+.chip span { box-shadow: 0 1px 2px rgba(29, 43, 92, 0.1), var(--brillo); }
+.chip input:checked + span { background: var(--on-bg); color: var(--on-ink); box-shadow: 0 6px 14px rgba(29, 43, 92, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+.pop { box-shadow: inset 0 1px 3px rgba(29, 43, 92, 0.1); }
+.ubtn .n, #lpForm button { background: linear-gradient(180deg, #17BF7E 0%, #00A060 60%, #008A52 100%); color: #ffffff; box-shadow: 0 6px 14px rgba(0, 160, 96, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.vb[aria-pressed="true"] .o { background: linear-gradient(180deg, #17BF7E, #00A060); box-shadow: 0 3px 8px rgba(0, 160, 96, 0.4); }
+.cap.nuevo { background: linear-gradient(180deg, #17BF7E, #00A060 60%, #008A52); box-shadow: 0 3px 8px rgba(0, 160, 96, 0.3); }
+/* la lista pasa de renglones a tarjetas */
+.scroll { border-top: 0; padding: 4px 12px 14px; }
+.row { margin-bottom: 8px; padding: 14px 16px; border-radius: 20px; background: var(--card); box-shadow: var(--sombra-card), var(--brillo); transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s; }
+.row::before, .row + .row::before, .scroll > .row:first-child::before { display: none !important; }
+.row:hover { background: var(--card); transform: translateY(-1px); box-shadow: var(--sombra-card-hover), var(--brillo); }
+.row.sel { background: var(--card); box-shadow: 0 0 0 2px var(--accent), var(--sombra-card-hover); }
+.row.visto { opacity: 0.74; }
+.tot { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.035em; }
+.tot small { font-weight: 400; }
+details.mas { border-top: 0; }
+details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 20px; background: var(--card); box-shadow: var(--sombra-card), var(--brillo); }
+.nota { border-top: 0; padding: 12px 8px 24px; }
+.vacio { margin: 8px 0; padding: 28px 20px; border-radius: 20px; background: var(--card); box-shadow: var(--sombra-card); text-align: center; }
+/* los precios del mapa, como piedras con brillo */
+.pill { background: linear-gradient(180deg, var(--pill-hi) 0%, var(--pill) 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 4px rgba(29, 43, 92, 0.24), 0 8px 18px rgba(29, 43, 92, 0.2), 0 0 0 1px rgba(29, 43, 92, 0.08); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.pill i { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+.pill.nuevo { background: linear-gradient(180deg, #17BF7E 0%, #00A060 55%, #008750 100%); color: #ffffff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 120, 70, 0.35), 0 8px 18px rgba(0, 160, 96, 0.32); }
+.pill.sel { background: linear-gradient(180deg, var(--sel-hi) 0%, var(--accent) 70%); color: var(--accent-ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 6px rgba(29, 43, 92, 0.35), 0 12px 24px rgba(29, 43, 92, 0.35); }
+.pill.visto { background: var(--visto-fill); box-shadow: 0 1px 3px rgba(29, 43, 92, 0.15); }
+.leyenda i { box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.55), 0 1px 2px rgba(29, 43, 92, 0.3); }
+.herr { box-shadow: 0 2px 4px rgba(29, 43, 92, 0.08), 0 14px 32px rgba(29, 43, 92, 0.18), var(--brillo), 0 0 0 1px var(--glass-line); }
+/* la tarjeta del edificio: un bloque azul tinta con relieve, que se despega del rosa */
+.hoja {
+  --ink: #F4E1DE; --ink2: #B9B6CC; --line: rgba(244, 225, 222, 0.16); --line2: #8A93C0; --chip: rgba(244, 225, 222, 0.1); --chip-ink: #F4E1DE;
+  --chip-on: #F4E1DE; --chip-on-ink: #1D2B5C; --accent: #F4E1DE; --accent-ink: #1D2B5C; --link: #F4E1DE; --accent-soft: rgba(244, 225, 222, 0.12);
+  --baja-bg: rgba(0, 160, 96, 0.28); --baja-ink: #5FE0AB; --nuevo-bg: rgba(0, 160, 96, 0.28); --nuevo-ink: #5FE0AB; --alto-bg: rgba(255, 120, 110, 0.24); --alto-ink: #FF9C95; --warn-ink: #FF9C95;
+  --card: rgba(244, 225, 222, 0.07); --card-line: rgba(255, 255, 255, 0.08); --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.3); --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --on-bg: linear-gradient(180deg, #FBEEEB, #F4E1DE); --on-ink: #1D2B5C; --campo: rgba(244, 225, 222, 0.1);
+  color: var(--ink); background: linear-gradient(160deg, #2C3E84 0%, #1D2B5C 52%, #141D45 100%); border-radius: 28px;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 2px 6px rgba(14, 21, 48, 0.3), 0 28px 64px rgba(14, 21, 48, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  animation: subir-d 0.24s ease-out;
+}
+.hoja .cab2 b { color: #ffffff; font-size: 19px; }
+.hoja .x { background: rgba(244, 225, 222, 0.14); }
+.hoja .x svg { stroke: #F4E1DE; }
+.hoja .tile { background: rgba(244, 225, 222, 0.09); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.hoja .tile b { font-size: 16px; }
+.hoja .row { margin: 0 12px 8px; background: var(--card); transform: none; }
+.hoja .row:hover { background: var(--card); transform: none; box-shadow: var(--sombra-card), var(--brillo); }
+.hoja .tot { color: #ffffff; }
+.hoja .cap.nuevo, .hoja .vb[aria-pressed="true"] .o { color: #ffffff; }
+.hoja details.ent-det[open] { border-bottom: 0; }
+.hoja .ent { margin: 0 12px 8px; padding: 12px 14px; border-radius: 16px; background: rgba(244, 225, 222, 0.06); }
+.hoja .ent + .ent { border-top: 0; padding-top: 12px; }
+@keyframes subir-d { from { opacity: 0; transform: translate(-50%, 14px); } }
+@keyframes subir-m { from { opacity: 0; transform: translateY(14px); } }
+@media (max-width: 979px) {
+  .marca { display: none; }
+  .ptop { padding: 12px 18px 14px; }
+  .estado { margin: 0; }
+  .tema { position: static; }
+  .scroll { padding: 4px 10px 14px; }
+  .row { padding: 14px 16px; }
+  .panel { border-radius: 26px 26px 0 0; }
+  .hoja { animation-name: subir-m; border-radius: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { .hoja { animation: none; } .row, .ubtn, .pill { transition: none; } }
 </style>
 </head>
 <body>
 <div id="mapa" role="region" aria-label="Mapa de la zona"></div>
+
+<div class="velo" aria-hidden="true"></div>
 
 <div class="topbar" id="topbar"></div>
 
@@ -314,7 +546,24 @@ body.eligiendo .leaflet-container { cursor: crosshair; }
 
   <div class="ptop" id="ptop">
     <div class="fila1">
-      <h1>Alquileres en Nueva Córdoba</h1>
+      <h1>Alquileres en <b>Nueva Córdoba</b></h1>
+      <svg class="marca" viewBox="0 0 120 64" aria-hidden="true">
+        <defs>
+          <radialGradient id="gEsf" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color: var(--m1)"/><stop offset="0.45" style="stop-color: var(--m2)"/><stop offset="1" style="stop-color: var(--m3)"/></radialGradient>
+          <linearGradient id="gCap" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color: var(--mc1)"/><stop offset="0.5" style="stop-color: var(--mc2)"/><stop offset="1" style="stop-color: var(--mc3)"/></linearGradient>
+          <linearGradient id="gAro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3DD68F"/><stop offset="1" stop-color="#00A060"/></linearGradient>
+        </defs>
+        <ellipse cx="60" cy="60" rx="56" ry="3" fill="rgba(29,43,92,0.16)"/>
+        <circle cx="20" cy="42" r="16" fill="url(#gEsf)"/>
+        <ellipse cx="14.5" cy="35.5" rx="5" ry="3.4" fill="rgba(255,255,255,0.34)"/>
+        <rect x="46" y="6" width="22" height="50" rx="11" fill="url(#gCap)"/>
+        <rect x="51" y="11" width="5" height="16" rx="2.5" fill="rgba(255,255,255,0.26)"/>
+        <ellipse cx="57" cy="30" rx="18" ry="6.5" fill="none" stroke="url(#gAro)" stroke-width="4"/>
+        <rect x="76" y="16" width="38" height="16" rx="8" transform="rotate(-24 95 24)" fill="url(#gCap)"/>
+        <rect x="81" y="19.5" width="13" height="4" rx="2" transform="rotate(-24 95 24)" fill="rgba(255,255,255,0.26)"/>
+        <circle cx="95" cy="46" r="10.5" fill="url(#gEsf)"/>
+        <ellipse cx="91.5" cy="42" rx="3.4" ry="2.4" fill="rgba(255,255,255,0.34)"/>
+      </svg>
       <button class="tema" id="tema" type="button" aria-label="Tema de la página" title="Tema"></button>
     </div>
     <div class="estado">
@@ -327,32 +576,53 @@ body.eligiendo .leaflet-container { cursor: crosshair; }
   </div>
 
   <section class="filtros" id="filtros" aria-label="Filtros">
-    <div class="fila">
+    <div class="fila" id="fRango">
       <span class="lab">Total</span>
       <select id="min" aria-label="Total desde"></select>
       <span class="lab">a</span>
       <select id="max" aria-label="Total hasta"></select>
     </div>
-    <div class="fila lugar">
-      <button class="lugar-btn" id="lugarBtn" type="button" aria-expanded="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14.2s4.6-3.9 4.6-7.6a4.6 4.6 0 0 0-9.2 0c0 3.7 4.6 7.6 4.6 7.6z"/><circle cx="8" cy="6.6" r="1.6"/></svg><span id="lugarTxt">Medir tiempo a un lugar</span></button>
-      <select id="lmodo" aria-label="Cómo llegás" hidden><option value="p">A pie</option><option value="b">En bici</option><option value="a">En auto</option></select>
-      <select id="lmax" aria-label="Tiempo máximo" hidden><option value="0">Sin límite</option><option value="5">Hasta 5 min</option><option value="10">Hasta 10 min</option><option value="15">Hasta 15 min</option><option value="20">Hasta 20 min</option><option value="30">Hasta 30 min</option></select>
+    <div class="tabs" id="tabs" role="group" aria-label="Qué avisos ver">
+      <button type="button" data-vista="todos" aria-pressed="true">Todos <b id="n-todos"></b></button>
+      <button type="button" data-vista="sinver" aria-pressed="false">Sin ver <b id="n-sinver"></b></button>
+      <button type="button" data-vista="nuevos" aria-pressed="false">Nuevos <b id="n-nuevos"></b></button>
+      <button type="button" data-vista="bajaron" aria-pressed="false">Bajaron <b id="n-bajaron"></b></button>
     </div>
-    <div class="lugar-pop" id="lugarPop" hidden>
+    <div class="util" id="fUtil">
+      <button class="ubtn" id="lugarBtn" type="button" aria-expanded="false" aria-controls="pLugar" title="Tiempo desde cada departamento a un lugar tuyo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14.2s4.6-3.9 4.6-7.6a4.6 4.6 0 0 0-9.2 0c0 3.7 4.6 7.6 4.6 7.6z"/><circle cx="8" cy="6.6" r="1.6"/></svg><span class="t" id="lugarTxt">Mi lugar</span></button>
+      <button class="ubtn" id="filtBtn" type="button" aria-expanded="false" aria-controls="pFiltros"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4.5h6M11.5 4.5h2M2.5 11.5h2M7.5 11.5h6"/><circle cx="10" cy="4.5" r="1.5"/><circle cx="6" cy="11.5" r="1.5"/></svg><span class="t">Filtros</span><span class="n" id="filtN" hidden></span></button>
+      <button class="ubtn" id="otrosBtn" type="button" aria-expanded="false" aria-controls="pOtros" title="Marketplace y Roomix"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5H4a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 4 13.5h7a1.5 1.5 0 0 0 1.5-1.5V9.5M9.5 2.5h4v4M13.5 2.5L7.5 8.5"/></svg><span class="t">Más sitios</span></button>
+    </div>
+    <div class="lp-estado" id="lugarEstado" role="status"></div>
+    <div class="pop" id="pLugar" hidden>
       <div id="lpLista"></div>
       <form id="lpForm"><input id="lpQ" type="search" placeholder="Dirección o lugar, ej.: Facultad de Derecho" autocomplete="off" aria-label="Buscar un lugar"><button type="submit">Buscar</button></form>
       <div id="lpRes"></div>
       <button type="button" class="lp-link" id="lpMapa">Elegir en el mapa</button>
+      <div class="lugar-opts" id="lugarOpts" hidden>
+        <select id="lmodo" aria-label="Cómo llegás"><option value="p">A pie</option><option value="b">En bici</option><option value="a">En auto</option></select>
+        <select id="lmax" aria-label="Tiempo máximo"><option value="0">Sin límite</option><option value="5">Hasta 5 min</option><option value="10">Hasta 10 min</option><option value="15">Hasta 15 min</option><option value="20">Hasta 20 min</option><option value="30">Hasta 30 min</option></select>
+      </div>
     </div>
-    <div class="lp-estado" id="lugarEstado" role="status"></div>
-    <div class="chips" id="chips">
-      <label class="chip"><input type="checkbox" id="nu"><span>Solo nuevos</span></label>
-      <label class="chip"><input type="checkbox" id="oc"><span>Ocultar vistos</span></label>
-      <label class="chip"><input type="checkbox" id="bd" checked><span>Incluir el borde</span></label>
-      <label class="chip"><input type="checkbox" id="pa"><span>Particulares</span></label>
-      <label class="chip"><input type="checkbox" id="sc"><span>Sin comisión</span></label>
-      <a class="chip-link" id="mkt" target="_blank" rel="noopener" title="Abre Facebook Marketplace con tu rango de precio. Ahí se revisa a mano.">Marketplace<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2.5H2.8a.8.8 0 0 0-.8.8v5.9c0 .44.36.8.8.8h5.9a.8.8 0 0 0 .8-.8V7.5M7 2h3v3M10 2L5.5 6.5"/></svg></a>
-      <a href="https://roomix.ai/buscar/alquilar/departamentos/en-nueva-cordoba-cordoba-capital/baratos" class="chip-link" id="rmx" target="_blank" rel="noopener" title="Abre Roomix con los departamentos de Nueva Córdoba hasta $850.000. Reúne avisos de varios portales, incluido Facebook Marketplace.">Roomix<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 2.5H2.8a.8.8 0 0 0-.8.8v5.9c0 .44.36.8.8.8h5.9a.8.8 0 0 0 .8-.8V7.5M7 2h3v3M10 2L5.5 6.5"/></svg></a>
+    <div class="pop" id="pFiltros" hidden>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="bd" checked><span>Incluir el borde de la zona</span></label>
+        <label class="chip"><input type="checkbox" id="pa"><span>Particulares</span></label>
+        <label class="chip"><input type="checkbox" id="sc"><span>Sin comisión</span></label>
+      </div>
+      <div class="pop-t">Que el aviso mencione</div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="fmas"><span>Acepta mascotas</span></label>
+        <label class="chip"><input type="checkbox" id="fasc"><span>Ascensor</span></label>
+        <label class="chip"><input type="checkbox" id="fbal"><span>Balcón</span></label>
+        <label class="chip"><input type="checkbox" id="famo"><span>Amoblado</span></label>
+        <label class="chip"><input type="checkbox" id="fcoc"><span>Cochera</span></label>
+      </div>
+      <button type="button" class="lp-link" id="filtLimpiar">Restablecer filtros</button>
+    </div>
+    <div class="pop" id="pOtros" hidden>
+      <a class="otro" id="mkt" target="_blank" rel="noopener"><b>Facebook Marketplace</b><span>Se abre con tu rango de precio. Ahí se revisa a mano.</span></a>
+      <a class="otro" id="rmx" href="https://roomix.ai/buscar/alquilar/departamentos/en-nueva-cordoba-cordoba-capital/baratos" target="_blank" rel="noopener"><b>Roomix</b><span>Avisos de varios portales en Nueva Córdoba, hasta $850.000.</span></a>
     </div>
   </section>
 
@@ -366,7 +636,7 @@ body.eligiendo .leaflet-container { cursor: crosshair; }
       <option value="m">Menor alquiler por m²</option>
       <option value="l">Más cerca de mi lugar</option>
     </select>
-    <p id="count2"></p>
+    
   </div>
 
   <div class="scroll" id="scroll">
@@ -392,7 +662,7 @@ body.eligiendo .leaflet-container { cursor: crosshair; }
   <button type="button" id="zr" aria-label="Volver a ver toda la zona" title="Ver toda la zona"><svg viewBox="0 0 18 18" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="9" r="3.2"/><path d="M9 1.5v3M9 13.5v3M1.5 9h3M13.5 9h3"/></svg></button>
   <button type="button" id="sbtn" aria-label="Ver sombras y sol" aria-pressed="false" title="Sombras y sol"><svg viewBox="0 0 18 18" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.2"/><path d="M9 1.8v1.8M9 14.4v1.8M1.8 9h1.8M14.4 9h1.8M3.9 3.9l1.3 1.3M12.8 12.8l1.3 1.3M3.9 14.1l1.3-1.3M12.8 5.2l1.3-1.3"/></svg></button>
 </div>
-<div class="leyenda" id="leyenda"><span><i class="i-def"></i>Aviso</span><span><i class="i-nu"></i>Nuevo</span><span><i class="i-vi"></i>Visto</span><span>Precio total del más barato de cada edificio</span><span>Punto: su precio aparece al acercar</span></div>
+<div class="leyenda" id="leyenda"><span><i class="i-def"></i>Aviso</span><span><i class="i-nu"></i>Nuevo</span><span><i class="i-vi"></i>Visto</span><span>Precio total de cada edificio</span></div>
 <div class="hoja" id="hoja" hidden></div>
 <div class="sbar" id="sbar" hidden>
   <div class="sb-fila"><b>Sombras</b><span id="sinfo"></span><button type="button" id="scerrar" class="sb-x" aria-label="Cerrar sombras"><svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg></button></div>
@@ -461,8 +731,8 @@ marcarTema(temaActual());
 /* ---------- acomodo según el ancho (compu: hoja a la izquierda; celu: hoja abajo y filtros arriba del mapa) ---------- */
 function ubicar() {
   const mv = esMovil(), panel = $('panel');
-  if (mv) { if ($('ptop').parentNode !== $('scroll')) $('scroll').insertBefore($('ptop'), $('scroll').firstChild); if ($('chips').parentNode !== $('topbar')) $('topbar').appendChild($('chips')); }
-  else { if ($('ptop').parentNode !== panel) panel.insertBefore($('ptop'), $('filtros')); if ($('chips').parentNode !== $('filtros')) $('filtros').appendChild($('chips')); }
+  if (mv) { if ($('ptop').parentNode !== $('scroll')) $('scroll').insertBefore($('ptop'), $('scroll').firstChild); if ($('tabs').parentNode !== $('topbar')) $('topbar').appendChild($('tabs')); }
+  else { if ($('ptop').parentNode !== panel) panel.insertBefore($('ptop'), $('filtros')); if ($('tabs').parentNode !== $('filtros')) $('filtros').insertBefore($('tabs'), $('fUtil')); }
   panel.style.height = '';
 }
 ubicar();
@@ -473,7 +743,7 @@ const ESTADOS = ['peek', 'half', 'full'];
 function estadoHoja(e) { const p = $('panel'); p.classList.remove('arrastrando'); p.style.height = ''; p.dataset.estado = e; }
 (function () {
   const p = $('panel'); let y0 = 0, h0 = 0, t0 = 0, mov = false, activo = false;
-  const altos = () => { const H = window.innerHeight; return [168, H * 0.56, H - 52]; };
+  const altos = () => { const H = window.innerHeight; return [214, H * 0.56, H - 52]; };
   const abajo = e => {
     if (!esMovil() || e.target.closest('select, a, button')) return;
     activo = true; mov = false; y0 = e.clientY; t0 = performance.now(); h0 = p.getBoundingClientRect().height;
@@ -510,7 +780,7 @@ async function cargarDatos() {
 }
 cargarDatos()
   .then(init)
-  .catch(() => { $('sello').textContent = 'Sin datos todavía'; $('count').textContent = 'Sin datos todavía'; $('count2').textContent = 'Ejecutá "Actualizar ahora" en la compu para generar el primer resultado.'; });
+  .catch(() => { $('sello').textContent = 'Sin datos todavía'; $('count').textContent = 'Sin datos todavía'; $('list').innerHTML = '<div class="vacio">Todavía no hay datos. Ejecutá "2 - Actualizar ahora" en la compu para generar el primer resultado.</div>'; });
 
 function leerZona() { for (const k in D.zona.calles) { NAMES[k] = D.zona.calles[k].nombre; FIT[k] = D.zona.calles[k].fit; } }
 // Dibuja la línea de estado (hace cuánto se actualizó y si algún sitio falló); se repite cada tanto para que el "hace X min" no quede viejo.
@@ -531,7 +801,7 @@ function pintarEstado() {
 function init(d) {
   D = d; leerZona(); pintarEstado();
   armarGrupos(); armarFiltros();
-  iniciarMapa(); render(); sincronizar(); cargarEntorno(); cargarEdificios(); iniciarSombras(); iniciarLugares();
+  iniciarMapa(); render(); sincronizar(); cargarEntorno(); iniciarSombras(); iniciarLugares();
   setInterval(refrescar, 5 * 60000);
 }
 // Trae los datos nuevos sin recargar la página (cada 5 minutos y al volver a la pestaña). No toca la tarjeta si hay una abierta.
@@ -611,17 +881,25 @@ function pos(g) {
 function etiqueta(g) { return g.st === '?' ? (g.d || 'Dirección no publicada') : (NAMES[g.st] || g.st) + (g.n % 100 === 0 ? ' al ' : ' ') + g.n; }
 
 /* ---------- filtros ---------- */
+const FILTROS = ['bd', 'pa', 'sc', 'fmas', 'fasc', 'fbal', 'famo', 'fcoc'];
+const VISTAS = ['todos', 'sinver', 'nuevos', 'bajaron'];
+let vista = 'todos';
 function armarFiltros() {
   $('min').innerHTML = mins.map(v => '<option value="' + v + '"' + (v === 550000 ? ' selected' : '') + '>' + money(v) + '</option>').join('');
   $('max').innerHTML = maxs.map(v => '<option value="' + v + '"' + (v === 850000 ? ' selected' : '') + '>' + money(v) + '</option>').join('');
-  const s = leer('alq-filtros2', null);
+  // los filtros guardados por las versiones anteriores pasan a las pestañas nuevas ("solo nuevos" y "ocultar vistos")
+  const s3 = leer('alq-filtros3', null), s2 = leer('alq-filtros2', null);
+  const s = s3 || (s2 && Object.assign({}, s2, { vista: s2.nu ? 'nuevos' : (s2.oc ? 'sinver' : 'todos') }));
   if (s) {
     if (mins.includes(s.min)) $('min').value = s.min;
-    if (maxs.includes(s.max)) $('max').value = (s.v === 2 || s.max !== 750000) ? s.max : 850000; // el tope viejo (750.000) pasa una vez a 850.000
-    for (const id of ['nu', 'oc', 'bd', 'pa', 'sc']) if (id in s) $(id).checked = !!s[id];
+    if (maxs.includes(s.max)) $('max').value = (s.v >= 2 || s.max !== 750000) ? s.max : 850000;
+    for (const id of FILTROS) if (id in s) $(id).checked = !!s[id];
     if (['t', 'n', 'r', 's', 'm', 'l'].includes(s.so)) $('so').value = s.so;
+    if (VISTAS.includes(s.vista)) vista = s.vista;
   }
-  ['min', 'max', 'nu', 'oc', 'bd', 'pa', 'sc', 'so'].forEach(id => $(id).addEventListener('change', render));
+  ['min', 'max', 'so', ...FILTROS].forEach(id => $(id).addEventListener('change', render));
+  document.querySelectorAll('[data-vista]').forEach(b => b.addEventListener('click', () => { vista = b.dataset.vista; render(); }));
+  $('filtLimpiar').addEventListener('click', () => { for (const id of FILTROS) $(id).checked = id === 'bd'; render(); });
 }
 
 /* ---------- análisis de cada aviso ---------- */
@@ -632,7 +910,7 @@ const COMODIDAD = { asc: 'Ascensor', bal: 'Balcón', coc: 'Cochera', mas: 'Acept
 function datosLinea(g, completo) {
   const p = [];
   if (g.m) p.push(g.m + ' m²');
-  if (g.ppm) p.push(money(g.ppm) + ' por m²');
+  if (g.ppm) p.push('$' + num(g.ppm) + '/m²');
   if (g.pi !== null) p.push(g.pi === 0 ? 'Planta baja' : 'Piso ' + g.pi);
   if (completo && g.or) p.push('Orientación ' + NOMBRE_ORIENT[g.or]);
   if (g.fc) p.push({ f: 'Al frente', c: 'Contrafrente', i: 'Interno' }[g.fc]);
@@ -641,7 +919,7 @@ function datosLinea(g, completo) {
 }
 function datosFila(g, enHoja) {
   const p = datosLinea(g, enHoja);
-  let h = p.length ? '<div class="datos">' + p.map(x => '<span>' + x + '</span>').join('') + '</div>' : '';
+  let h = p.length ? '<div class="datos">' + p.join(' · ') + '</div>' : '';
   const lt = lineaLugar(g); if (lt) h += '<div class="datos lugar-linea">' + lt + '</div>';
   if (enHoja && g.x.size) h += '<div class="como">' + [...g.x].map(k => '<span class="' + (k === 'nomas' ? 'no' : '') + '">' + COMODIDAD[k] + '</span>').join('') + '</div>';
   return h;
@@ -693,7 +971,7 @@ function entornoDe(g) {
   if (!razones.length) razones.push('Calle interna, sin avenidas ni locales nocturnos cerca');
   const cerca = [['Colectivo', masCerca(ENT.bus)], ['Supermercado', masCerca(ENT.super)], ['Farmacia', masCerca(ENT.farm)], ['Plaza o parque', masCerca(ENT.verde)], ['Facultad', masCerca(ENT.uni)]]
     .filter(c => c[1] && c[1].d <= 700).map(c => c[0] + ' ' + metros(c[1].d));
-  return (CACHE_ENT[clave] = { nivel, razones, cerca });
+  return (CACHE_ENT[clave] = { nivel, razones, cerca, bus: masCerca(ENT.bus) });
 }
 function entornoBase(g) {
   const e = entornoDe(g); if (!e) return '';
@@ -773,7 +1051,7 @@ function dibujarSombras() {
   const mpp = 156543.03 * Math.cos(c.lat * Math.PI / 180) / Math.pow(2, m.getZoom());
   const k = 1 / (Math.tan(s.alt) * mpp), maxPx = 220 / mpp;
   const ux = Math.sin(s.az + Math.PI) * k, uy = -Math.cos(s.az + Math.PI) * k;
-  ctx.fillStyle = '#000';
+  ctx.fillStyle = oscuro() ? '#000000' : '#1D2B5C';
   const vista = m.getBounds().pad(0.35);
   for (const b of EDIF) {
     const q0 = b.pts[0]; if (!vista.contains(q0)) continue;
@@ -854,17 +1132,21 @@ function horasDeSol(g) {
   }
   return { celdas, az, supuesto: g.pi === null };
 }
-function solHtml(g) {
-  if (!EDIF) return '';
-  const r = horasDeSol(g); if (!r) return '';
+function solDatos(g) {
+  if (!EDIF) { cargarEdificios(); return null; }
+  const r = horasDeSol(g); if (!r) return null;
   const tramos = []; let ini = null;
   r.celdas.forEach((e, i) => { if (e === 3 && ini === null) ini = 7 + i; if ((e !== 3 || i === r.celdas.length - 1) && ini !== null) { tramos.push([ini, 7 + i + (e === 3 ? 1 : 0)]); ini = null; } });
   const dir = ['norte', 'noreste', 'este', 'sudeste', 'sur', 'sudoeste', 'oeste', 'noroeste'][Math.round(((r.az * 180 / Math.PI) % 360 + 360) % 360 / 45) % 8];
-  const texto = tramos.length ? 'Sol directo de ' + tramos.map(t => t[0] + ' a ' + t[1] + ' h').join(' y ') : 'Sin sol directo en esta fachada';
-  return '<div class="sol"><div class="ent-r"><span>Sol en la fachada</span><b class="nivel ' + (tramos.length ? 'medio' : 'bajo') + '">' + (tramos.length ? 'Sí' : 'No') + '</b></div>' +
-    '<div class="sol-tira" role="img" aria-label="' + texto + '">' + r.celdas.map((e, i) => '<i class="e' + e + '" title="' + (7 + i) + ' h: ' + ['sin sol', 'sombra de edificios vecinos', 'el sol da del otro lado de la fachada', 'sol directo'][e] + '"></i>').join('') + '</div>' +
+  return { r, tramos, dir, texto: tramos.length ? 'Sol directo de ' + tramos.map(t => t[0] + ' a ' + t[1] + ' h').join(' y ') : 'Sin sol directo en esta fachada', corto: tramos.length ? tramos.map(t => t[0] + '–' + t[1] + ' h').join(' · ') : 'Sin sol' };
+}
+function solHtml(g) {
+  const s = solDatos(g); if (!s) return '';
+  const r = s.r;
+  return '<div class="sol"><div class="ent-r"><span>Sol en la fachada</span><b class="nivel ' + (s.tramos.length ? 'si' : 'no') + '">' + (s.tramos.length ? 'Sí' : 'No') + '</b></div>' +
+    '<div class="sol-tira" role="img" aria-label="' + s.texto + '">' + r.celdas.map((e, i) => '<i class="e' + e + '" title="' + (7 + i) + ' h: ' + ['sin sol', 'sombra de edificios vecinos', 'el sol da del otro lado de la fachada', 'sol directo'][e] + '"></i>').join('') + '</div>' +
     '<div class="sol-h"><span>7</span><span>13</span><span>19 h</span></div>' +
-    '<div class="ent-s">' + texto + ' (' + NOMBRE_FECHA[modoFecha] + '). Fachada hacia el ' + dir + (g.or ? ', según el aviso' : ', la que da a la calle') + '.' + (r.supuesto ? ' Se supone un 3.º piso.' : '') + '</div></div>';
+    '<div class="ent-s">' + s.texto + ' (' + NOMBRE_FECHA[modoFecha] + '). Fachada hacia el ' + s.dir + (g.or ? ', según el aviso' : ', la que da a la calle') + '.' + (r.supuesto ? ' Se supone un 3.º piso.' : '') + '</div></div>';
 }
 
 /* ---------- tiempo a un lugar ---------- */
@@ -916,9 +1198,10 @@ function agregarLugar(l) {
 function guardarLugares() { guardar('alq-lugares', lugares); guardar('alq-lugar-activo', lugarId); guardar('alq-lugar-modo', modoL); guardar('alq-lugar-max', maxL); guardar('alq-tiempos', TIEMPOS); }
 function mostrarLugar() {
   const l = lugarActivo();
-  $('lugarTxt').textContent = l ? corto(l.n, 26) : 'Medir tiempo a un lugar';
-  $('lmodo').hidden = $('lmax').hidden = !l; $('lmodo').value = modoL; $('lmax').value = String(maxL);
-  $('lugarBtn').classList.toggle('activo', !!l);
+  $('lugarTxt').textContent = l ? corto(l.n, 18) + (maxL ? ' · ≤' + maxL + ' min' : '') : 'Mi lugar';
+  $('lugarBtn').title = l ? 'Tiempo ' + NOMBRE_MODO[modoL] + ' a ' + l.n : 'Tiempo desde cada departamento a un lugar tuyo';
+  $('lugarBtn').classList.toggle('on', !!l);
+  $('lugarOpts').hidden = !l; $('lmodo').value = modoL; $('lmax').value = String(maxL);
   $('lugarEstado').textContent = calculando ? 'Calculando tiempos…' : '';
   $('lpLista').innerHTML = lugares.map(x => '<div class="lp-item' + (x.id === lugarId ? ' on' : '') + '"><button type="button" data-lug="' + x.id + '">' + corto(x.n, 44) + '</button><button type="button" class="lp-x" data-quitar="' + x.id + '" aria-label="Quitar ' + x.n.replace(/"/g, '') + '">' + CERRAR + '</button></div>').join('');
   const m = LM.m; if (m && m._lugar) {
@@ -926,15 +1209,23 @@ function mostrarLugar() {
     if (l) L.marker([l.lat, l.lng], { icon: L.divIcon({ className: 'pillwrap', html: '<div class="lugar-pin"><span>' + l.n.replace(/</g, '') + '</span></div>', iconSize: [0, 0] }), zIndexOffset: 20000, keyboard: false }).addTo(m._lugar);
   }
 }
-function lineaLugar(g) { const l = lugarActivo(), t = l && minutos(g, l, modoL); return t != null ? t + ' min ' + NOMBRE_MODO[modoL] + ' · ' + corto(l.n, 30) : ''; }
+function lineaLugar(g) { const l = lugarActivo(), t = l && minutos(g, l, modoL); return t != null ? t + ' min ' + NOMBRE_MODO[modoL] + ' · ' + corto(l.n, 20) : ''; }
 function lugaresHtml(g) {
   if (!lugares.length) return '';
   const filas = lugares.map(l => { const t = ['p', 'b', 'a'].map(m => minutos(g, l, m)); if (t[0] === null) return ''; return '<div class="lug"><b>' + corto(l.n, 34) + '</b> ' + t[0] + ' min a pie · ' + t[1] + ' en bici · ' + t[2] + ' en auto</div>'; }).join('');
   return filas ? '<div class="lugares"><div class="ent-r"><span>Tiempo a tus lugares</span></div>' + filas + '</div>' : '';
 }
+// Los tres botones de abajo de los filtros (lugar, filtros, otros sitios) abren su panel de a uno
+const POPS = { lugarBtn: 'pLugar', filtBtn: 'pFiltros', otrosBtn: 'pOtros' };
+function abrirPop(btn) {
+  let abrio = false;
+  for (const b in POPS) { const quiere = b === btn && $(POPS[b]).hidden; $(POPS[b]).hidden = !quiere; $(b).setAttribute('aria-expanded', String(quiere)); if (quiere) abrio = true; }
+  if (abrio && esMovil() && $('panel').dataset.estado === 'peek') estadoHoja('half');
+  return abrio;
+}
+function cerrarPops() { for (const b in POPS) { $(POPS[b]).hidden = true; $(b).setAttribute('aria-expanded', 'false'); } }
 function iniciarLugares() {
-  const pop = $('lugarPop');
-  $('lugarBtn').addEventListener('click', () => { pop.hidden = !pop.hidden; $('lugarBtn').setAttribute('aria-expanded', String(!pop.hidden)); if (!pop.hidden) { if (esMovil()) estadoHoja('half'); $('lpQ').focus(); } });
+  for (const b in POPS) $(b).addEventListener('click', () => { if (abrirPop(b) && b === 'lugarBtn') $('lpQ').focus(); });
   $('lpForm').addEventListener('submit', async e => {
     e.preventDefault(); const q = $('lpQ').value.trim(); if (!q) return;
     $('lpRes').innerHTML = '<div class="lp-nota">Buscando…</div>';
@@ -944,15 +1235,15 @@ function iniciarLugares() {
       $('lpRes').innerHTML = rs.length ? rs.map((x, i) => '<button type="button" class="lp-op" data-res="' + i + '">' + x.n.replace(/</g, '') + '</button>').join('') : '<div class="lp-nota">No encontré ese lugar en Córdoba. Probá con la calle y la altura, o elegilo en el mapa.</div>';
     } catch (err) { $('lpRes').innerHTML = '<div class="lp-nota">No pude buscar ahora. Elegí el lugar en el mapa.</div>'; }
   });
-  $('lugarPop').addEventListener('click', e => {
+  $('pLugar').addEventListener('click', e => {
     const r = e.target.closest('[data-res]'), u = e.target.closest('[data-lug]'), q = e.target.closest('[data-quitar]');
-    if (r && window.__res) { const x = window.__res[+r.dataset.res]; $('lpRes').innerHTML = ''; $('lpQ').value = ''; pop.hidden = true; $('lugarBtn').setAttribute('aria-expanded', 'false'); agregarLugar({ n: x.n, lat: x.lat, lng: x.lng }); }
+    if (r && window.__res) { const x = window.__res[+r.dataset.res]; $('lpRes').innerHTML = ''; $('lpQ').value = ''; cerrarPops(); agregarLugar({ n: x.n, lat: x.lat, lng: x.lng }); }
     if (u) { lugarId = u.dataset.lug; guardarLugares(); mostrarLugar(); calcularTiempos(lugarActivo()); render(); }
     if (q) { lugares = lugares.filter(x => x.id !== q.dataset.quitar); delete TIEMPOS[q.dataset.quitar]; if (lugarId === q.dataset.quitar) lugarId = lugares.length ? lugares[lugares.length - 1].id : null; guardarLugares(); mostrarLugar(); render(); }
   });
-  $('lpMapa').addEventListener('click', () => { eligiendoLugar = true; document.body.classList.add('eligiendo'); pop.hidden = true; $('lugarBtn').setAttribute('aria-expanded', 'false'); $('lugarEstado').textContent = 'Tocá el mapa donde está el lugar'; if (esMovil()) estadoHoja('peek'); });
-  $('lmodo').addEventListener('change', e => { modoL = e.target.value; guardarLugares(); render(); });
-  $('lmax').addEventListener('change', e => { maxL = +e.target.value; guardarLugares(); render(); });
+  $('lpMapa').addEventListener('click', () => { eligiendoLugar = true; document.body.classList.add('eligiendo'); cerrarPops(); $('lugarEstado').textContent = 'Tocá el mapa donde está el lugar'; if (esMovil()) estadoHoja('peek'); });
+  $('lmodo').addEventListener('change', e => { modoL = e.target.value; guardarLugares(); mostrarLugar(); render(); });
+  $('lmax').addEventListener('change', e => { maxL = +e.target.value; guardarLugares(); mostrarLugar(); render(); });
   mostrarLugar();
   const l = lugarActivo(); if (l) calcularTiempos(l);
 }
@@ -968,47 +1259,64 @@ function tocoMapa(latlng) {
 }
 
 // Lo que se muestra arriba de los avisos en la tarjeta de un edificio: ruido y cercanías, tiempo a tus lugares y sol en la fachada
+// Resumen de cuatro datos (ruido, sol, tiempo a tu lugar, colectivo) y, plegado, el detalle de cada uno
 function entornoHtml(g) {
+  const e = entornoDe(g), s = solDatos(g), la = lugarActivo(), min = la ? minutos(g, la, modoL) : null, tiles = [];
+  if (e) tiles.push(['Ruido', '<b class="' + e.nivel + '">' + e.nivel[0].toUpperCase() + e.nivel.slice(1) + '</b>']);
+  if (s) tiles.push(['Sol directo', '<b>' + s.corto + '</b>']);
+  if (la && min !== null) tiles.push([NOMBRE_MODO[modoL][0].toUpperCase() + NOMBRE_MODO[modoL].slice(1) + ' · ' + corto(la.n, 12), '<b>' + min + ' min</b>']);
+  if (e && e.bus !== null && e.bus.d <= 700) tiles.push(['Colectivo', '<b>' + metros(e.bus.d) + '</b>']);
+  if (!tiles.length) return '';
   const lug = lugaresHtml(g), sol = solHtml(g);
-  return entornoBase(g) + (lug ? '<div class="ent">' + lug + '</div>' : '') + (sol ? '<div class="ent">' + sol + '</div>' : '');
+  return '<div class="tiles">' + tiles.map(t => '<div class="tile"><small>' + t[0] + '</small>' + t[1] + '</div>').join('') + '</div>' +
+    '<details class="ent-det"><summary>Ver detalle</summary>' + entornoBase(g) + (lug ? '<div class="ent">' + lug + '</div>' : '') + (sol ? '<div class="ent">' + sol + '</div>' : '') + '</details>';
 }
 
 /* ---------- lista ---------- */
-function capsulas(g, corto) {
+function capsulas(g) {
   const t = [];
   if (g.nuevo) t.push('<span class="cap nuevo" title="Apareció ' + hace(g.p) + '">Nuevo</span>');
   if (g.baja) t.push('<span class="cap baja" title="Bajó el alquiler en los últimos 14 días">' + FLECHA + 'Bajó ' + money(g.baja) + '</span>');
   if (g.cmp !== null && g.cmp <= -10) t.push('<span class="cap bueno" title="Alquiler por m² comparado con ' + g.pares + ' avisos de tamaño parecido de esta lista">' + (-g.cmp) + '% menos que similares</span>');
   else if (g.cmp !== null && g.cmp >= 10) t.push('<span class="tag" title="Alquiler por m² comparado con ' + g.pares + ' avisos de tamaño parecido de esta lista">' + g.cmp + '% más que similares</span>');
-  if (g.z === 'b') t.push('<span class="tag">' + (corto ? 'Borde' : 'Borde de la zona') + '</span>');
-  if (g.f.has('P')) t.push('<span class="tag">Particular</span>');
-  if (g.f.has('S')) t.push('<span class="tag">Sin comisión</span>');
-  if (g.st === '?' && !g.d && !corto) t.push('<span class="tag">Ubicación según el aviso</span>');
   return t.join('');
+}
+// lo que va en segundo plano, al lado de los sitios donde está publicado el aviso
+function pieTexto(g, enHoja) {
+  const t = [];
+  if (g.z === 'b') t.push(enHoja ? 'Borde' : 'Borde de la zona');
+  if (g.f.has('P')) t.push('Particular');
+  if (g.f.has('S')) t.push('Sin comisión');
+  if (g.st === '?' && !g.d && !enHoja) t.push('Ubicación según el aviso');
+  return t.map(x => '<span>' + x + '</span>').join('');
 }
 const enlaces = g => g.src.map(x => '<a href="' + SRC[x.s][1](x.id) + '" target="_blank" rel="noopener" data-vis="1">' + SRC[x.s][0] + '</a>').join('');
 const botonVisto = (g, v) => '<button class="vb" type="button" aria-pressed="' + v + '" data-vb="' + g.i + '"><span class="o">' + CHECK + '</span>' + (v ? 'Visto' : 'Marcar visto') + '</button>';
-function filaHtml(g, desconocido, enHoja) {
+function filaHtml(g, desconocido, enHoja, sinTitulo) {
   const v = visto(g), resaltada = sel === g || (hojaItems && hojaItems.includes(g));
-  const det = '<span>Alquiler ' + money(g.r) + '</span> <span>' + (desconocido ? '+ expensas sin publicar' : '+ expensas ' + num(g.e)) + '</span>';
-  const tot = desconocido ? '<small>Alquiler</small>' + money(g.r) : '<small>Total</small>' + money(g.r + g.e);
+  const tot = desconocido ? '<small>Alquiler</small>' + money(g.r) : money(g.r + g.e);
+  const sub = desconocido ? '+ expensas sin publicar' : num(g.r) + ' + ' + num(g.e) + ' exp.';
   return '<div class="row' + (v ? ' visto' : '') + (resaltada && !enHoja ? ' sel' : '') + '" data-i="' + g.i + '"' + (enHoja ? '' : ' id="g' + g.i + '"') + '>' +
-    '<div class="main"><div class="ttl">' + etiqueta(g) + '</div><div class="det">' + det + '</div>' + datosFila(g, !!enHoja) + '<div class="tags">' + capsulas(g, !!enHoja) + '</div><div class="lnk">' + enlaces(g) + '</div></div>' +
-    '<div class="side"><div class="tot">' + tot + '</div>' + botonVisto(g, v) + '</div></div>';
+    '<div class="main">' + (sinTitulo ? '' : '<div class="ttl">' + etiqueta(g) + '</div>') + datosFila(g, !!enHoja) + '<div class="tags">' + capsulas(g) + '</div><div class="pie">' + enlaces(g) + pieTexto(g, !!enHoja) + '</div></div>' +
+    '<div class="side"><div class="tot">' + tot + '</div><div class="sub">' + sub + '</div>' + botonVisto(g, v) + '</div></div>';
 }
 function render() {
   const min = +$('min').value, max = +$('max').value, o = {};
-  for (const id of ['nu', 'oc', 'bd', 'pa', 'sc']) o[id] = $(id).checked;
-  guardar('alq-filtros2', Object.assign({ v: 2, min, max, so: $('so').value }, o));
+  for (const id of FILTROS) o[id] = $(id).checked;
+  guardar('alq-filtros3', Object.assign({ v: 3, min, max, so: $('so').value, vista }, o));
   $('mkt').href = urlMarketplace(min, max);
-  const ok = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.nu || g.nuevo) && (!o.oc || !visto(g));
   const la = lugarActivo(), okL = g => { if (!la || !maxL) return true; const t = minutos(g, la, modoL); return t === null || t <= maxL; };
-  const main = [], unk = [];
+  const base = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.fmas || g.x.has('mas')) && (!o.fasc || g.x.has('asc')) && (!o.fbal || g.x.has('bal')) && (!o.famo || g.x.has('amo')) && (!o.fcoc || g.x.has('coc')) && okL(g);
+  const porVista = { todos: () => true, sinver: g => !visto(g), nuevos: g => !!g.nuevo, bajaron: g => !!g.baja };
+  const main = [], unk = [], n = { todos: 0, sinver: 0, nuevos: 0, bajaron: 0 };
   groups.forEach((g, i) => {
     g.i = i;
-    if (!ok(g) || !okL(g)) return;
-    if (g.e !== null) { const t = g.r + g.e; if (t >= min && t <= max) main.push(g); }
-    else if (g.r >= min - 150000 && g.r <= max - 50000) unk.push(g);
+    if (!base(g)) return;
+    const conExp = g.e !== null;
+    if (conExp ? !(g.r + g.e >= min && g.r + g.e <= max) : !(g.r >= min - 150000 && g.r <= max - 50000)) return;
+    if (conExp) { n.todos++; if (!visto(g)) n.sinver++; if (g.nuevo) n.nuevos++; if (g.baja) n.bajaron++; }
+    if (!porVista[vista](g)) return;
+    (conExp ? main : unk).push(g);
   });
   const cmp = {
     t: (a, b) => (a.r + a.e) - (b.r + b.e) || a.r - b.r,
@@ -1020,10 +1328,13 @@ function render() {
   }[$('so').value];
   main.sort(cmp); unk.sort((a, b) => a.r - b.r || etiqueta(a).localeCompare(etiqueta(b), 'es'));
   vigentes = main.concat(unk);
-  const nn = main.filter(g => g.nuevo).length, vv = main.filter(visto).length, bb = main.filter(g => g.baja).length;
-  $('count').textContent = main.length + (main.length === 1 ? ' departamento' : ' departamentos');
-  $('count2').textContent = [nn + (nn === 1 ? ' nuevo' : ' nuevos'), bb + (bb === 1 ? ' bajó de precio' : ' bajaron de precio'), vv + (vv === 1 ? ' visto' : ' vistos')].join(' · ');
-  $('list').innerHTML = main.length ? main.map(g => filaHtml(g, false)).join('') : '<div class="vacio">No hay avisos con esos filtros. Probá ampliar el rango de total o sumar el borde de la zona.</div>';
+  for (const k in n) $('n-' + k).textContent = n[k];
+  document.querySelectorAll('[data-vista]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.vista === vista)));
+  const extras = FILTROS.filter(id => (id === 'bd' ? !o.bd : o[id])).length;
+  $('filtN').hidden = !extras; $('filtN').textContent = extras; $('filtBtn').classList.toggle('on', extras > 0);
+  $('count').innerHTML = '<b>' + main.length + '</b> ' + (main.length === 1 ? 'departamento' : 'departamentos');
+  const vacio = { todos: 'No hay avisos con esos filtros. Probá ampliar el rango de total o sumar el borde de la zona.', sinver: 'No quedan avisos sin ver con estos filtros.', nuevos: 'No hay avisos nuevos con estos filtros.', bajaron: 'Ningún aviso bajó de precio con estos filtros.' }[vista];
+  $('list').innerHTML = main.length ? main.map(g => filaHtml(g, false)).join('') : '<div class="vacio">' + vacio + '</div>';
   $('unks').innerHTML = 'Sin expensas publicadas (' + unk.length + ') <small>alquiler entre ' + money(min - 150000) + ' y ' + money(max - 50000) + '</small>';
   $('ulist').innerHTML = unk.length ? unk.map(g => filaHtml(g, true)).join('') : '<div class="vacio">Ninguno con estos filtros.</div>';
   pintarMapa();
@@ -1064,7 +1375,7 @@ const limitesZona = () => L.latLngBounds(D.zona.poligono.map(p => [p[1], p[0]]))
 // Zona visible: en la compu es lo que queda a la derecha de la hoja; en el celu, lo que queda entre los filtros y la hoja de abajo.
 function margenes() {
   const r = $('panel').getBoundingClientRect();
-  if (esMovil()) return { tl: [16, 64], br: [16, 168 + 24] };
+  if (esMovil()) return { tl: [16, 64], br: [16, 214 + 24] };
   return { tl: [r.right + 28, 28], br: [76, 28] };
 }
 function ajustarMapa(animar) {
@@ -1099,6 +1410,7 @@ function iniciarMapa() {
 function temaMapa() { if (LM.m) ponerBase(LM.m); pintarMapa(); }
 // Un precio por edificio (misma dirección). Si dos precios se taparían entre sí, el más barato (o el nuevo) conserva su precio y el otro
 // queda como punto, que muestra el precio al pasar el mouse y aparece completo al acercar el mapa. Así no hay números de "agrupados".
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 function pintarMapa() {
   const m = LM.m; if (!m) return;
   m._capa.clearLayers(); pastillas = [];
@@ -1130,8 +1442,8 @@ function pintarMapa() {
     const choca = ocupados.some(o => caja.x1 < o.x2 && caja.x2 > o.x1 && caja.y1 < o.y2 && caja.y2 > o.y1);
     const titulo = etiqueta(b.items[0]) + ' · ' + money(b.total) + (n > 1 ? ' · ' + n + ' avisos en este edificio' : '');
     if (choca && !b.sel) {
-      const relleno = b.vistos ? (osc ? '#636366' : '#aeaeb2') : b.nuevo ? '#ff9f0a' : (osc ? '#f5f5f7' : '#1d1d1f');
-      const mk = L.circleMarker(b.p, { radius: b.nuevo ? 6 : 5, color: osc ? '#1c1c1e' : '#ffffff', weight: 1.5, fillColor: relleno, fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
+      const relleno = b.vistos ? css('--line2') : b.nuevo ? css('--nuevo-fill') : css('--ink');
+      const mk = L.circleMarker(b.p, { radius: b.nuevo ? 6 : 5, color: css('--surface'), weight: 1.5, fillColor: relleno, fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
       mk.bindTooltip(titulo);
       mk.on('click', () => elegirCelda(b));
       continue;
@@ -1143,10 +1455,10 @@ function pintarMapa() {
     mk.on('click', () => elegirCelda(b));
     pastillas.push({ items: b.items, mk });
   }
-  const sinExpensas = osc ? '#a1a1a6' : '#6e6e73';
+  const sinExpensas = css('--ink2');
   for (const q of sueltos) {
     const esSel = sel === q.g;
-    const mk = L.circleMarker(q.p, { radius: esSel ? 9 : 5, color: esSel ? (osc ? '#0a84ff' : '#0071e3') : sinExpensas, weight: 2.5, fillColor: osc ? '#1c1c1e' : '#ffffff', fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
+    const mk = L.circleMarker(q.p, { radius: esSel ? 9 : 5, color: esSel ? css('--accent') : sinExpensas, weight: 2.5, fillColor: css('--surface'), fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
     mk.bindTooltip(etiqueta(q.g) + ' · alquiler ' + money(q.g.r) + ', expensas sin publicar');
     mk.on('click', () => elegirCelda({ items: [q.g] }));
   }
@@ -1173,8 +1485,10 @@ function elegirCelda(c) {
   pintarMapa();
 }
 function hoja(items) {
-  const h = $('hoja');
-  h.innerHTML = '<button class="x" type="button" id="hojaX" aria-label="Cerrar">' + CERRAR + '</button>' + '<div class="cab">' + items.length + (items.length === 1 ? ' aviso en este edificio' : ' avisos en este edificio') + '</div>' + entornoHtml(items[0]) + items.map(g => filaHtml(g, g.e === null, true)).join('');
+  const h = $('hoja'), g0 = items[0];
+  h.innerHTML = '<button class="x" type="button" id="hojaX" aria-label="Cerrar">' + CERRAR + '</button>' +
+    '<div class="cab2"><b>' + etiqueta(g0) + '</b><span>' + (items.length === 1 ? '1 aviso' : items.length + ' avisos') + '</span></div>' +
+    entornoHtml(g0) + items.map(g => filaHtml(g, g.e === null, true, etiqueta(g) === etiqueta(g0))).join('');
   h.hidden = false; document.body.classList.add('conhoja');
   $('hojaX').addEventListener('click', cerrarHoja);
 }
