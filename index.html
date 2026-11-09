@@ -880,7 +880,8 @@ const corto = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 const minutos = (g, lugar, modo) => { const p = pos(g); if (!p || !lugar) return null; const t = (TIEMPOS[lugar.id] || {})[claveP(p)]; return t && t[modo] != null ? t[modo] : null; };
 
 async function calcularTiempos(lugar) {
-  if (calculando) return; calculando = true; $('lugarEstado').textContent = 'Calculando tiempos…';
+  if (calculando) return;
+  if (Math.hypot((lugar.lat - ORIGEN[0]) * 111000, (lugar.lng - ORIGEN[1]) * 94900) > 40000) { $('lugarEstado').textContent = 'Ese lugar queda lejos de Nueva Córdoba: elegí uno de la ciudad.'; lugares = lugares.filter(x => x.id !== lugar.id); lugarId = lugares.length ? lugares[lugares.length - 1].id : null; guardarLugares(); mostrarLugar(); return; } calculando = true; $('lugarEstado').textContent = 'Calculando tiempos…';
   const T = TIEMPOS[lugar.id] = TIEMPOS[lugar.id] || {};
   const pendientes = [...new Set(groups.map(pos).filter(Boolean).map(claveP))].filter(k => !T[k] || T[k].a == null);
   try {
@@ -904,7 +905,7 @@ async function calcularTiempos(lugar) {
   calculando = false; mostrarLugar(); render(); if (hojaItems && !$('hoja').hidden) hoja(hojaItems);
 }
 async function buscarLugar(q) {
-  const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=ar&viewbox=-64.30,-31.33,-64.08,-31.50&q=' + encodeURIComponent(q + ' Córdoba'));
+  const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=ar&viewbox=-64.32,-31.30,-64.05,-31.52&bounded=1&q=' + encodeURIComponent(q + ' Córdoba'));
   return (await r.json()).map(x => ({ n: corto([x.name, ...String(x.display_name).split(', ')].filter((v, i, a) => v && a.indexOf(v) === i).slice(0, 2).join(', '), 48), lat: +x.lat, lng: +x.lon }));
 }
 function agregarLugar(l) {
@@ -940,7 +941,7 @@ function iniciarLugares() {
     try {
       const rs = await buscarLugar(q);
       window.__res = rs;
-      $('lpRes').innerHTML = rs.length ? rs.map((x, i) => '<button type="button" class="lp-op" data-res="' + i + '">' + x.n.replace(/</g, '') + '</button>').join('') : '<div class="lp-nota">No encontré ese lugar. Probá con la calle y la altura, o elegilo en el mapa.</div>';
+      $('lpRes').innerHTML = rs.length ? rs.map((x, i) => '<button type="button" class="lp-op" data-res="' + i + '">' + x.n.replace(/</g, '') + '</button>').join('') : '<div class="lp-nota">No encontré ese lugar en Córdoba. Probá con la calle y la altura, o elegilo en el mapa.</div>';
     } catch (err) { $('lpRes').innerHTML = '<div class="lp-nota">No pude buscar ahora. Elegí el lugar en el mapa.</div>'; }
   });
   $('lugarPop').addEventListener('click', e => {
