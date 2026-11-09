@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 /* Dirección: el mapa es la pantalla. Una hoja de vidrio con la lista flota encima (a la izquierda en la compu, abajo en el celu).
    Apple: gris/blanco/negro, un solo azul para acciones y selección, naranja = nuevo, verde = bajó de precio.
@@ -408,10 +408,136 @@ h1 b { font-weight: 700; }
 .lugar-pin { background: var(--verde); }
 .sombras-lienzo { opacity: 0.3; }
 .leyenda i.i-def { background: var(--ink); }
+/* ===== volumen: tarjetas con sombra, objetos con brillo y una tarjeta azul que resalta sobre el rosa ===== */
+:root {
+  --panel-bg: linear-gradient(180deg, rgba(252, 240, 237, 0.88) 0%, rgba(244, 225, 222, 0.8) 100%);
+  --card: #FDF7F5; --card-line: rgba(29, 43, 92, 0.06);
+  --sombra-card: 0 1px 2px rgba(29, 43, 92, 0.07), 0 8px 20px rgba(29, 43, 92, 0.08);
+  --sombra-card-hover: 0 2px 4px rgba(29, 43, 92, 0.09), 0 14px 30px rgba(29, 43, 92, 0.15);
+  --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --campo: rgba(255, 255, 255, 0.6);
+  --on-bg: linear-gradient(180deg, #3A4C94 0%, #1D2B5C 100%); --on-ink: #F4E1DE;
+  --pill-hi: #ffffff; --pill: #F6E8E5; --sel-hi: #3A4C94;
+  --m1: #7A8CD0; --m2: #2B3C7E; --m3: #141D45; --mc1: #4357A0; --mc2: #1D2B5C; --mc3: #121A3E;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --panel-bg: linear-gradient(180deg, rgba(30, 43, 96, 0.9) 0%, rgba(15, 23, 56, 0.9) 100%);
+    --card: rgba(255, 255, 255, 0.06); --card-line: rgba(255, 255, 255, 0.08);
+    --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 22px rgba(0, 0, 0, 0.3);
+    --sombra-card-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 34px rgba(0, 0, 0, 0.45);
+    --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --campo: rgba(255, 255, 255, 0.08);
+    --on-bg: linear-gradient(180deg, #FBEEEB 0%, #F4E1DE 100%); --on-ink: #1D2B5C;
+    --pill-hi: #3A4C94; --pill: #2B3A78; --sel-hi: #FFF3F0;
+    --m1: #9AA9E6; --m2: #4A5CA8; --m3: #26336F; --mc1: #6D80C8; --mc2: #3B4C92; --mc3: #26336F;
+  }
+}
+:root[data-theme="dark"] {
+  --panel-bg: linear-gradient(180deg, rgba(30, 43, 96, 0.9) 0%, rgba(15, 23, 56, 0.9) 100%);
+  --card: rgba(255, 255, 255, 0.06); --card-line: rgba(255, 255, 255, 0.08);
+  --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 22px rgba(0, 0, 0, 0.3);
+  --sombra-card-hover: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 34px rgba(0, 0, 0, 0.45);
+  --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --campo: rgba(255, 255, 255, 0.08);
+  --on-bg: linear-gradient(180deg, #FBEEEB 0%, #F4E1DE 100%); --on-ink: #1D2B5C;
+  --pill-hi: #3A4C94; --pill: #2B3A78; --sel-hi: #FFF3F0;
+  --m1: #9AA9E6; --m2: #4A5CA8; --m3: #26336F; --mc1: #6D80C8; --mc2: #3B4C92; --mc3: #26336F;
+}
+/* bruma de color sobre el mapa, del lado de la hoja, para que todo se sienta de una pieza */
+.velo { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(900px 720px at 0% 42%, rgba(244, 225, 222, 0.5), transparent 70%), radial-gradient(700px 460px at 100% 100%, rgba(29, 43, 92, 0.1), transparent 72%); }
+:root[data-theme="dark"] .velo { background: radial-gradient(900px 720px at 0% 42%, rgba(60, 80, 170, 0.22), transparent 70%), radial-gradient(700px 460px at 100% 100%, rgba(0, 160, 96, 0.07), transparent 72%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .velo { background: radial-gradient(900px 720px at 0% 42%, rgba(60, 80, 170, 0.22), transparent 70%), radial-gradient(700px 460px at 100% 100%, rgba(0, 160, 96, 0.07), transparent 72%); } }
+/* la hoja */
+.panel { border-radius: 28px; background: var(--panel-bg); box-shadow: 0 2px 4px rgba(29, 43, 92, 0.08), 0 24px 60px rgba(29, 43, 92, 0.24), var(--brillo), 0 0 0 1px var(--glass-line); }
+/* título grande, fino y negrita, y los tres objetos de la marca */
+.ptop { position: relative; padding: 22px 22px 0; }
+h1 { font-size: 28px; line-height: 1.02; letter-spacing: -0.035em; font-weight: 300; max-width: 200px; }
+h1 b { display: block; font-weight: 700; }
+.marca { position: absolute; right: 62px; top: 14px; width: 122px; height: 65px; filter: drop-shadow(0 6px 8px rgba(29, 43, 92, 0.22)); pointer-events: none; }
+.tema { position: absolute; top: 20px; right: 20px; background: var(--card); box-shadow: var(--sombra-card), var(--brillo); }
+.estado { margin-top: 12px; }
+.resumen h2 { font-weight: 300; font-size: 23px; letter-spacing: -0.03em; }
+.resumen h2 b { font-weight: 700; }
+/* controles con relieve */
+select { background-color: var(--campo); box-shadow: 0 1px 2px rgba(29, 43, 92, 0.08), var(--brillo); }
+.tabs { box-shadow: inset 0 1px 3px rgba(29, 43, 92, 0.14); }
+.tabs button { transition: background-color 0.2s, box-shadow 0.2s, color 0.2s; }
+.tabs button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 2px rgba(29, 43, 92, 0.2), 0 5px 12px rgba(29, 43, 92, 0.12), var(--brillo); }
+.ubtn { background: var(--card); border-color: var(--card-line); box-shadow: var(--sombra-card), var(--brillo); transition: transform 0.15s, box-shadow 0.15s; }
+.ubtn:hover { background: var(--card); transform: translateY(-1px); box-shadow: var(--sombra-card-hover), var(--brillo); }
+.ubtn:active { transform: translateY(0) scale(0.98); }
+.ubtn[aria-expanded="true"], .ubtn.on { background: var(--on-bg); color: var(--on-ink); border-color: transparent; box-shadow: 0 8px 18px rgba(29, 43, 92, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+.chip span { box-shadow: 0 1px 2px rgba(29, 43, 92, 0.1), var(--brillo); }
+.chip input:checked + span { background: var(--on-bg); color: var(--on-ink); box-shadow: 0 6px 14px rgba(29, 43, 92, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+.pop { box-shadow: inset 0 1px 3px rgba(29, 43, 92, 0.1); }
+.ubtn .n, #lpForm button { background: linear-gradient(180deg, #17BF7E 0%, #00A060 60%, #008A52 100%); color: #ffffff; box-shadow: 0 6px 14px rgba(0, 160, 96, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.vb[aria-pressed="true"] .o { background: linear-gradient(180deg, #17BF7E, #00A060); box-shadow: 0 3px 8px rgba(0, 160, 96, 0.4); }
+.cap.nuevo { background: linear-gradient(180deg, #17BF7E, #00A060 60%, #008A52); box-shadow: 0 3px 8px rgba(0, 160, 96, 0.3); }
+/* la lista pasa de renglones a tarjetas */
+.scroll { border-top: 0; padding: 4px 12px 14px; }
+.row { margin-bottom: 8px; padding: 14px 16px; border-radius: 20px; background: var(--card); box-shadow: var(--sombra-card), var(--brillo); transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s; }
+.row::before, .row + .row::before, .scroll > .row:first-child::before { display: none !important; }
+.row:hover { background: var(--card); transform: translateY(-1px); box-shadow: var(--sombra-card-hover), var(--brillo); }
+.row.sel { background: var(--card); box-shadow: 0 0 0 2px var(--accent), var(--sombra-card-hover); }
+.row.visto { opacity: 0.74; }
+.tot { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.035em; }
+.tot small { font-weight: 400; }
+details.mas { border-top: 0; }
+details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 20px; background: var(--card); box-shadow: var(--sombra-card), var(--brillo); }
+.nota { border-top: 0; padding: 12px 8px 24px; }
+.vacio { margin: 8px 0; padding: 28px 20px; border-radius: 20px; background: var(--card); box-shadow: var(--sombra-card); text-align: center; }
+/* los precios del mapa, como piedras con brillo */
+.pill { background: linear-gradient(180deg, var(--pill-hi) 0%, var(--pill) 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 4px rgba(29, 43, 92, 0.24), 0 8px 18px rgba(29, 43, 92, 0.2), 0 0 0 1px rgba(29, 43, 92, 0.08); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.pill i { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+.pill.nuevo { background: linear-gradient(180deg, #17BF7E 0%, #00A060 55%, #008750 100%); color: #ffffff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 120, 70, 0.35), 0 8px 18px rgba(0, 160, 96, 0.32); }
+.pill.sel { background: linear-gradient(180deg, var(--sel-hi) 0%, var(--accent) 70%); color: var(--accent-ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 6px rgba(29, 43, 92, 0.35), 0 12px 24px rgba(29, 43, 92, 0.35); }
+.pill.visto { background: var(--visto-fill); box-shadow: 0 1px 3px rgba(29, 43, 92, 0.15); }
+.leyenda i { box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.55), 0 1px 2px rgba(29, 43, 92, 0.3); }
+.herr { box-shadow: 0 2px 4px rgba(29, 43, 92, 0.08), 0 14px 32px rgba(29, 43, 92, 0.18), var(--brillo), 0 0 0 1px var(--glass-line); }
+/* la tarjeta del edificio: un bloque azul tinta con relieve, que se despega del rosa */
+.hoja {
+  --ink: #F4E1DE; --ink2: #B9B6CC; --line: rgba(244, 225, 222, 0.16); --line2: #8A93C0; --chip: rgba(244, 225, 222, 0.1); --chip-ink: #F4E1DE;
+  --chip-on: #F4E1DE; --chip-on-ink: #1D2B5C; --accent: #F4E1DE; --accent-ink: #1D2B5C; --link: #F4E1DE; --accent-soft: rgba(244, 225, 222, 0.12);
+  --baja-bg: rgba(0, 160, 96, 0.28); --baja-ink: #5FE0AB; --nuevo-bg: rgba(0, 160, 96, 0.28); --nuevo-ink: #5FE0AB; --alto-bg: rgba(255, 120, 110, 0.24); --alto-ink: #FF9C95; --warn-ink: #FF9C95;
+  --card: rgba(244, 225, 222, 0.07); --card-line: rgba(255, 255, 255, 0.08); --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.3); --brillo: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --on-bg: linear-gradient(180deg, #FBEEEB, #F4E1DE); --on-ink: #1D2B5C; --campo: rgba(244, 225, 222, 0.1);
+  color: var(--ink); background: linear-gradient(160deg, #2C3E84 0%, #1D2B5C 52%, #141D45 100%); border-radius: 28px;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 2px 6px rgba(14, 21, 48, 0.3), 0 28px 64px rgba(14, 21, 48, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  animation: subir-d 0.24s ease-out;
+}
+.hoja .cab2 b { color: #ffffff; font-size: 19px; }
+.hoja .x { background: rgba(244, 225, 222, 0.14); }
+.hoja .x svg { stroke: #F4E1DE; }
+.hoja .tile { background: rgba(244, 225, 222, 0.09); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.hoja .tile b { font-size: 16px; }
+.hoja .row { margin: 0 12px 8px; background: var(--card); transform: none; }
+.hoja .row:hover { background: var(--card); transform: none; box-shadow: var(--sombra-card), var(--brillo); }
+.hoja .tot { color: #ffffff; }
+.hoja .cap.nuevo, .hoja .vb[aria-pressed="true"] .o { color: #ffffff; }
+.hoja details.ent-det[open] { border-bottom: 0; }
+.hoja .ent { margin: 0 12px 8px; padding: 12px 14px; border-radius: 16px; background: rgba(244, 225, 222, 0.06); }
+.hoja .ent + .ent { border-top: 0; padding-top: 12px; }
+@keyframes subir-d { from { opacity: 0; transform: translate(-50%, 14px); } }
+@keyframes subir-m { from { opacity: 0; transform: translateY(14px); } }
+@media (max-width: 979px) {
+  .marca { display: none; }
+  .ptop { padding: 12px 18px 14px; }
+  .estado { margin: 0; }
+  .tema { position: static; }
+  .scroll { padding: 4px 10px 14px; }
+  .row { padding: 14px 16px; }
+  .panel { border-radius: 26px 26px 0 0; }
+  .hoja { animation-name: subir-m; border-radius: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { .hoja { animation: none; } .row, .ubtn, .pill { transition: none; } }
 </style>
 </head>
 <body>
 <div id="mapa" role="region" aria-label="Mapa de la zona"></div>
+
+<div class="velo" aria-hidden="true"></div>
 
 <div class="topbar" id="topbar"></div>
 
@@ -421,6 +547,23 @@ h1 b { font-weight: 700; }
   <div class="ptop" id="ptop">
     <div class="fila1">
       <h1>Alquileres en <b>Nueva Córdoba</b></h1>
+      <svg class="marca" viewBox="0 0 120 64" aria-hidden="true">
+        <defs>
+          <radialGradient id="gEsf" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color: var(--m1)"/><stop offset="0.45" style="stop-color: var(--m2)"/><stop offset="1" style="stop-color: var(--m3)"/></radialGradient>
+          <linearGradient id="gCap" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color: var(--mc1)"/><stop offset="0.5" style="stop-color: var(--mc2)"/><stop offset="1" style="stop-color: var(--mc3)"/></linearGradient>
+          <linearGradient id="gAro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3DD68F"/><stop offset="1" stop-color="#00A060"/></linearGradient>
+        </defs>
+        <ellipse cx="60" cy="60" rx="56" ry="3" fill="rgba(29,43,92,0.16)"/>
+        <circle cx="20" cy="42" r="16" fill="url(#gEsf)"/>
+        <ellipse cx="14.5" cy="35.5" rx="5" ry="3.4" fill="rgba(255,255,255,0.34)"/>
+        <rect x="46" y="6" width="22" height="50" rx="11" fill="url(#gCap)"/>
+        <rect x="51" y="11" width="5" height="16" rx="2.5" fill="rgba(255,255,255,0.26)"/>
+        <ellipse cx="57" cy="30" rx="18" ry="6.5" fill="none" stroke="url(#gAro)" stroke-width="4"/>
+        <rect x="76" y="16" width="38" height="16" rx="8" transform="rotate(-24 95 24)" fill="url(#gCap)"/>
+        <rect x="81" y="19.5" width="13" height="4" rx="2" transform="rotate(-24 95 24)" fill="rgba(255,255,255,0.26)"/>
+        <circle cx="95" cy="46" r="10.5" fill="url(#gEsf)"/>
+        <ellipse cx="91.5" cy="42" rx="3.4" ry="2.4" fill="rgba(255,255,255,0.34)"/>
+      </svg>
       <button class="tema" id="tema" type="button" aria-label="Tema de la página" title="Tema"></button>
     </div>
     <div class="estado">
@@ -1189,7 +1332,7 @@ function render() {
   document.querySelectorAll('[data-vista]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.vista === vista)));
   const extras = FILTROS.filter(id => (id === 'bd' ? !o.bd : o[id])).length;
   $('filtN').hidden = !extras; $('filtN').textContent = extras; $('filtBtn').classList.toggle('on', extras > 0);
-  $('count').textContent = main.length + (main.length === 1 ? ' departamento' : ' departamentos');
+  $('count').innerHTML = '<b>' + main.length + '</b> ' + (main.length === 1 ? 'departamento' : 'departamentos');
   const vacio = { todos: 'No hay avisos con esos filtros. Probá ampliar el rango de total o sumar el borde de la zona.', sinver: 'No quedan avisos sin ver con estos filtros.', nuevos: 'No hay avisos nuevos con estos filtros.', bajaron: 'Ningún aviso bajó de precio con estos filtros.' }[vista];
   $('list').innerHTML = main.length ? main.map(g => filaHtml(g, false)).join('') : '<div class="vacio">' + vacio + '</div>';
   $('unks').innerHTML = 'Sin expensas publicadas (' + unk.length + ') <small>alquiler entre ' + money(min - 150000) + ' y ' + money(max - 50000) + '</small>';
