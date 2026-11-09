@@ -640,6 +640,7 @@ details.hist > summary b.sube { background: var(--alto-bg); color: var(--alto-in
         <label class="chip"><input type="checkbox" id="fbal"><span>Balcón</span></label>
         <label class="chip"><input type="checkbox" id="famo"><span>Amoblado</span></label>
         <label class="chip"><input type="checkbox" id="fcoc"><span>Cochera</span></label>
+        <label class="chip"><input type="checkbox" id="fvc"><span>Corriente de aire</span></label>
       </div>
       <button type="button" class="lp-link" id="filtLimpiar">Restablecer filtros</button>
     </div>
@@ -905,7 +906,7 @@ function pos(g) {
 function etiqueta(g) { return g.st === '?' ? (g.d || 'Dirección no publicada') : (NAMES[g.st] || g.st) + (g.n % 100 === 0 ? ' al ' : ' ') + g.n; }
 
 /* ---------- filtros ---------- */
-const FILTROS = ['bd', 'pa', 'sc', 'fmas', 'fasc', 'fbal', 'famo', 'fcoc'];
+const FILTROS = ['bd', 'pa', 'sc', 'fmas', 'fasc', 'fbal', 'famo', 'fcoc', 'fvc'];
 const VISTAS = ['todos', 'sinver', 'nuevos', 'bajaron'];
 let vista = 'todos';
 function armarFiltros() {
@@ -930,7 +931,7 @@ function armarFiltros() {
 // Superficie, piso, orientación y comodidades salen de lo que dice cada aviso (si no lo dice, no se muestra).
 // El entorno (ruido estimado y distancias) se calcula con calles, paradas, locales y comercios de OpenStreetMap.
 const NOMBRE_ORIENT = { N: 'norte', S: 'sur', E: 'este', O: 'oeste', NE: 'noreste', NO: 'noroeste', SE: 'sudeste', SO: 'sudoeste' };
-const COMODIDAD = { asc: 'Ascensor', bal: 'Balcón', coc: 'Cochera', mas: 'Acepta mascotas', nomas: 'No acepta mascotas', amo: 'Amoblado', lum: 'Luminoso', seg: 'Seguridad o encargado', lav: 'Lavadero', ter: 'Terraza o patio', pil: 'Pileta', gim: 'Gimnasio' };
+const COMODIDAD = { vc: 'Ventilación cruzada', asc: 'Ascensor', bal: 'Balcón', coc: 'Cochera', mas: 'Acepta mascotas', nomas: 'No acepta mascotas', amo: 'Amoblado', lum: 'Luminoso', seg: 'Seguridad o encargado', lav: 'Lavadero', ter: 'Terraza o patio', pil: 'Pileta', gim: 'Gimnasio' };
 function datosLinea(g, completo) {
   const p = [];
   if (g.m) p.push(g.m + ' m²');
@@ -1338,6 +1339,7 @@ function capsulas(g) {
   if (g.baja) t.push('<span class="cap baja" title="Bajó el alquiler en los últimos 14 días">' + FLECHA + 'Bajó ' + money(g.baja) + '</span>');
   if (g.cmp !== null && g.cmp <= -10) t.push('<span class="cap bueno" title="Alquiler por m² comparado con ' + g.pares + ' avisos de tamaño parecido de esta lista">' + (-g.cmp) + '% menos que similares</span>');
   else if (g.cmp !== null && g.cmp >= 10) t.push('<span class="tag" title="Alquiler por m² comparado con ' + g.pares + ' avisos de tamaño parecido de esta lista">' + g.cmp + '% más que similares</span>');
+  if (g.x && g.x.has('vc')) t.push('<span class="cap bueno" title="El aviso menciona ventilación cruzada, pasante o ventanas al frente y al contrafrente (lo dice el aviso, no está verificado)">Corriente de aire</span>');
   return t.join('');
 }
 // lo que va en segundo plano, al lado de los sitios donde está publicado el aviso
@@ -1365,7 +1367,7 @@ function render() {
   guardar('alq-filtros3', Object.assign({ v: 3, min, max, so: $('so').value, vista }, o));
   $('mkt').href = urlMarketplace(min, max);
   const la = lugarActivo(), okL = g => { if (!la || !maxL) return true; const t = minutos(g, la, modoL); return t === null || t <= maxL; };
-  const base = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.fmas || g.x.has('mas')) && (!o.fasc || g.x.has('asc')) && (!o.fbal || g.x.has('bal')) && (!o.famo || g.x.has('amo')) && (!o.fcoc || g.x.has('coc')) && okL(g);
+  const base = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.fmas || g.x.has('mas')) && (!o.fasc || g.x.has('asc')) && (!o.fbal || g.x.has('bal')) && (!o.famo || g.x.has('amo')) && (!o.fcoc || g.x.has('coc')) && (!o.fvc || g.x.has('vc')) && okL(g);
   const porVista = { todos: () => true, sinver: g => !visto(g), nuevos: g => !!g.nuevo, bajaron: g => !!g.baja };
   const main = [], unk = [], n = { todos: 0, sinver: 0, nuevos: 0, bajaron: 0 };
   groups.forEach((g, i) => {
