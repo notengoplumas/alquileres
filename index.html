@@ -533,6 +533,25 @@ details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 2
   .hoja { animation-name: subir-m; border-radius: 26px; }
 }
 @media (prefers-reduced-motion: reduce) { .hoja { animation: none; } .row, .ubtn, .pill { transition: none; } }
+/* corriente de aire: rosa de vientos y texto */
+.aire { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 12px; align-items: center; margin-top: 8px; }
+.aire-x p { margin: 0 0 5px; font-size: 12.5px; line-height: 1.4; color: var(--ink2); }
+.aire-x p:first-child { color: var(--ink); font-weight: 500; }
+.rosa { display: block; width: 132px; height: 132px; }
+.rosa .aro { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
+.rosa .v0 { fill: var(--ink); opacity: 0.16; }
+.rosa .v1 { fill: #19B877; }
+.rosa .v2 { fill: #8e8e93; opacity: 0.7; }
+.rosa .fach { fill: none; stroke: var(--ink); stroke-width: 3.4; stroke-linecap: round; }
+.rosa text { font-size: 9px; font-weight: 600; fill: var(--ink2); text-anchor: middle; dominant-baseline: central; }
+.aire-ley { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 11.5px; color: var(--ink2); }
+.aire-ley span { display: inline-flex; align-items: center; gap: 5px; }
+.aire-ley i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.aire-ley i.v0 { background: var(--ink); opacity: 0.2; }
+.aire-ley i.v1 { background: #19B877; }
+.aire-ley i.v2 { background: #8e8e93; opacity: 0.8; }
+.aire-b .ent-s { margin-top: 8px; font-size: 11.5px; }
+
 /* historial de precios en la tarjeta */
 details.hist { margin-top: 8px; border-radius: 14px; background: var(--chip); grid-column: 1 / -1; min-width: 0; }
 details.hist > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; font-size: 13px; font-weight: 500; }
@@ -641,7 +660,10 @@ details.hist > summary b.sube { background: var(--alto-bg); color: var(--alto-in
         <label class="chip"><input type="checkbox" id="fbal"><span>Balcón</span></label>
         <label class="chip"><input type="checkbox" id="famo"><span>Amoblado</span></label>
         <label class="chip"><input type="checkbox" id="fcoc"><span>Cochera</span></label>
-        <label class="chip"><input type="checkbox" id="fvc"><span>Corriente de aire</span></label>
+      </div>
+      <div class="pop-t">Según la ubicación y el viento</div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="fvc"><span>Buena corriente de aire</span></label>
       </div>
       <button type="button" class="lp-link" id="filtLimpiar">Restablecer filtros</button>
     </div>
@@ -947,7 +969,8 @@ function datosFila(g, enHoja) {
   const p = datosLinea(g, enHoja);
   let h = p.length ? '<div class="datos">' + p.join(' · ') + '</div>' : '';
   const lt = lineaLugar(g); if (lt) h += '<div class="datos lugar-linea">' + lt + '</div>';
-  if (enHoja && g.x.size) h += '<div class="como">' + [...g.x].map(k => '<span class="' + (k === 'nomas' ? 'no' : '') + '">' + COMODIDAD[k] + '</span>').join('') + '</div>';
+  const comodidades = [...g.x].filter(k => k !== 'vc'); // la ventilación cruzada ya va como cápsula
+  if (enHoja && comodidades.length) h += '<div class="como">' + comodidades.map(k => '<span class="' + (k === 'nomas' ? 'no' : '') + '">' + COMODIDAD[k] + '</span>').join('') + '</div>';
   return h;
 }
 // Compara el alquiler por m² de cada aviso con el de los de tamaño parecido de esta misma lista
@@ -1032,6 +1055,7 @@ function cargarEdificios() {
       for (let cx = Math.floor(x0 / C); cx <= Math.floor(x1 / C); cx++) for (let cy = Math.floor(y0 / C); cy <= Math.floor(y1 / C); cy++) { const key = cx + ',' + cy; if (!GRILLA.has(key)) GRILLA.set(key, []); GRILLA.get(key).push(i); }
       return { pts, xy, area: a, h: h > 0 ? h : alturaSupuesta(a), x0, x1, y0, y1 };
     });
+    aireCache.clear(); render();
     dibujarSombras();
     if (hojaItems && !$('hoja').hidden) hoja(hojaItems);
   }).catch(() => {}).finally(() => { cargandoEdif = false; });
@@ -1175,6 +1199,99 @@ function solHtml(g) {
     '<div class="ent-s">' + s.texto + ' (' + NOMBRE_FECHA[modoFecha] + '). Fachada hacia el ' + s.dir + (g.or ? ', según el aviso' : ', la que da a la calle') + '.' + (r.supuesto ? ' Se supone un 3.º piso.' : '') + '</div></div>';
 }
 
+/* ---------- corriente de aire ---------- */
+// Estimación según la dirección en que sopla el viento en Nueva Córdoba, hacia dónde mira la fachada y qué edificios vecinos la tapan.
+// Viento: % de las horas con viento (≥ 1,5 m/s) desde cada una de las 16 direcciones, datos horarios ERA5 2015-2024 en -31,42 / -64,19. Un 20 % del tiempo está en calma.
+const ROSA = [8.8, 17.3, 16.8, 4.7, 2.4, 2.3, 4.1, 7.3, 12, 6.6, 3.3, 2.1, 2.9, 2, 3, 4.3];
+const ROSA_N = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
+const ROSA_SUMA = ROSA.reduce((a, b) => a + b, 0);
+const aireCache = new Map();
+const lista8 = ['norte', 'noreste', 'este', 'sudeste', 'sur', 'sudoeste', 'oeste', 'noroeste'];
+const enumerar = a => (a.length > 1 ? a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1] : a[0] || '');
+
+function aireDatos(g) {
+  if (!EDIF) return null;
+  const p = pos(g); if (!p) return null;
+  const vc = !!(g.x && g.x.has('vc'));
+  const clave = claveP(p) + '|' + (g.fc || '') + '|' + (g.or || '') + '|' + (g.pi == null ? '' : g.pi) + '|' + (vc ? 1 : 0);
+  if (aireCache.has(clave)) return aireCache.get(clave);
+  let r = null;
+  if (g.fc === 'i' && !vc) r = { nivel: 'baja', titulo: 'Baja', clase: 'alto', interno: true };
+  else {
+    const f = fachada(p);
+    if (f) {
+      let az = f.az + (g.fc === 'c' ? Math.PI : 0);
+      if (g.or) az = ORIENT_AZ[g.or] * Math.PI / 180;
+      const rad = Math.PI / 180, z = (g.pi != null ? g.pi : 3) * 3 + 1.5, propio = EDIF[f.i];
+      const sa = Math.sin(az), ca = Math.cos(az);
+      // ¿le llega el viento que sopla desde el acimut th hasta el punto (ox, oy)? Lo tapa un edificio vecino más alto que la ventana (con ~11° de pendiente)
+      const libre = (ox, oy, th) => {
+        const sx = Math.sin(th), sy = Math.cos(th);
+        for (let d = 2; d <= 120; d += 2) {
+          const x = ox + sx * d, y = oy + sy * d, lista = GRILLA.get(Math.floor(x / 60) + ',' + Math.floor(y / 60));
+          if (!lista) continue;
+          for (const i of lista) { if (i === f.i) continue; const b = EDIF[i]; if (b.h > z + d * 0.2 && x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1 && dentroPoly(b.xy, x, y)) return false; }
+        }
+        return true;
+      };
+      const oxA = f.qx + sa * 1.2, oyA = f.qy + ca * 1.2;
+      // lado opuesto del edificio, para el caso de ventilación cruzada
+      let prof = null, oxB = 0, oyB = 0;
+      for (let d = 1; d <= 60; d++) { const x = f.qx - sa * d, y = f.qy - ca * d; if (!dentroPoly(propio.xy, x, y)) { if (d >= 3) { prof = d; oxB = x - sa * 1.2; oyB = y - ca * 1.2; } break; } }
+      const cruzada = vc; // el aviso lo confirma; si no se puede medir el lado opuesto se lo supone abierto
+      const sec = [], recibe = []; let llega = 0;
+      for (let i = 0; i < 16; i++) {
+        const th = i * 22.5 * rad, c = Math.cos(th - az);
+        let e = 0, lado = 'A';
+        if (c > 0.05) e = libre(oxA, oyA, th) ? 1 : 2;
+        else if (cruzada && c < -0.05) { lado = 'B'; e = prof !== null ? (libre(oxB, oyB, th) ? 1 : 2) : 1; }
+        sec.push(e);
+        if (e === 1) { llega += ROSA[i]; recibe.push([ROSA_N[i], ROSA[i]]); }
+      }
+      const share = llega / ROSA_SUMA * 100;
+      const nivel = cruzada ? (share >= 75 ? 'buena' : share >= 50 ? 'media' : 'baja') : (share >= 50 ? 'buena' : share >= 30 ? 'media' : 'baja');
+      const tapados = sec.map((e, i) => [e, i]).filter(t => t[0] === 2 && ROSA[t[1]] >= 4).map(t => ROSA_N[t[1]]);
+      r = {
+        nivel, titulo: nivel === 'buena' ? 'Buena' : nivel === 'media' ? 'Media' : 'Baja', clase: nivel === 'buena' ? 'bajo' : nivel === 'media' ? 'medio' : 'alto',
+        sec, az, dir: lista8[Math.round(((az * 180 / Math.PI) % 360 + 360) % 360 / 45) % 8], share: Math.round(share), cruzada, vc, prof, ladoB: prof !== null, tapados,
+        recibe: recibe.sort((a, b) => b[1] - a[1]).slice(0, 3).map(t => t[0]), supuesto: g.pi == null, delAviso: !!g.or
+      };
+    }
+  }
+  aireCache.set(clave, r);
+  return r;
+}
+const aireBuena = g => !!(g.x && g.x.has('vc')) || (() => { const a = aireDatos(g); return !!a && a.nivel === 'buena'; })();
+
+function rosaSvg(a) {
+  const C = 66, Rm = 40, Ra = 51, rad = Math.PI / 180, maxf = 17.3;
+  const P = (r, an) => (C + r * Math.sin(an)).toFixed(1) + ' ' + (C - r * Math.cos(an)).toFixed(1);
+  let s = '<svg class="rosa" viewBox="0 0 132 132" role="img" aria-label="Rosa de vientos de la zona: en verde los que le llegan a esta fachada">';
+  s += '<circle cx="' + C + '" cy="' + C + '" r="' + Rm + '" class="aro"/>';
+  a.sec.forEach((e, i) => {
+    const r = 9 + (Rm - 9) * ROSA[i] / maxf, a0 = (i * 22.5 - 10.5) * rad, a1 = (i * 22.5 + 10.5) * rad;
+    s += '<path class="v' + e + '" d="M' + C + ' ' + C + ' L' + P(r, a0) + ' A' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 0 1 ' + P(r, a1) + ' Z"/>';
+  });
+  const arco = az => '<path class="fach" d="M' + P(Ra, az - 0.72) + ' A' + Ra + ' ' + Ra + ' 0 0 1 ' + P(Ra, az + 0.72) + '"/>';
+  s += arco(a.az) + (a.cruzada ? arco(a.az + Math.PI) : '');
+  s += '<text x="' + C + '" y="7">N</text><text x="125" y="' + C + '">E</text><text x="' + C + '" y="125">S</text><text x="7" y="' + C + '">O</text></svg>';
+  return s;
+}
+function aireHtml(g) {
+  const a = aireDatos(g); if (!a) return '';
+  let h = '<div class="aire-b"><div class="ent-r"><span>Corriente de aire</span><b class="nivel ' + a.clase + '">' + a.titulo + '</b></div>';
+  if (a.interno) return h + '<div class="ent-s">Es interno: no da a la calle, así que casi no recibe viento. Es una estimación.</div></div>';
+  const lineas = [];
+  lineas.push('Fachada hacia el ' + a.dir + (a.delAviso ? ', según el aviso' : ', la que da a la calle') + '.');
+  lineas.push(a.recibe.length ? 'Le llega el viento del ' + enumerar(a.recibe) + ': ' + a.share + ' % de las horas con viento.' : 'No le llega ninguno de los vientos frecuentes.');
+  if (a.tapados.length) lineas.push('Los edificios vecinos le tapan el ' + enumerar(a.tapados) + '.');
+  lineas.push(a.cruzada ? 'El aviso dice que tiene ventilación cruzada: entra aire por un lado y sale por el otro.' + (a.ladoB ? '' : ' No pude medir el lado opuesto y lo supongo abierto.') : 'Con ventanas de un solo lado el aire entra pero no cruza. Si es pasante (frente y contrafrente) mejora mucho: preguntalo.');
+  h += '<div class="aire"><div>' + rosaSvg(a) + '</div><div class="aire-x">' + lineas.map(l => '<p>' + l + '</p>').join('') + '</div></div>' +
+    '<div class="aire-ley"><span><i class="v1"></i>Le llega</span><span><i class="v2"></i>Tapado por vecinos</span><span><i class="v0"></i>Viene de atrás</span></div>' +
+    '<div class="ent-s">La rosa muestra de dónde sopla el viento en Nueva Córdoba (más largo = más frecuente; 2015-2024; 20 % del tiempo hay calma). Es una estimación del edificio y su entorno, no del departamento.' + (a.supuesto ? ' Se supone un 3.º piso.' : '') + '</div></div>';
+  return h;
+}
+
 /* ---------- tiempo a un lugar ---------- */
 // Rutas reales a pie, en bici y en auto con el servicio gratuito de OpenStreetMap (FOSSGIS). Los lugares se guardan solo en este dispositivo.
 const RUTAS = { p: 'routed-foot', b: 'routed-bike', a: 'routed-car' };
@@ -1287,15 +1404,16 @@ function tocoMapa(latlng) {
 // Lo que se muestra arriba de los avisos en la tarjeta de un edificio: ruido y cercanías, tiempo a tus lugares y sol en la fachada
 // Resumen de cuatro datos (ruido, sol, tiempo a tu lugar, colectivo) y, plegado, el detalle de cada uno
 function entornoHtml(g) {
-  const e = entornoDe(g), s = solDatos(g), la = lugarActivo(), min = la ? minutos(g, la, modoL) : null, tiles = [];
+  const e = entornoDe(g), s = solDatos(g), ai = aireDatos(g), la = lugarActivo(), min = la ? minutos(g, la, modoL) : null, tiles = [];
   if (e) tiles.push(['Ruido', '<b class="' + e.nivel + '">' + e.nivel[0].toUpperCase() + e.nivel.slice(1) + '</b>']);
   if (s) tiles.push(['Sol directo', '<b>' + s.corto + '</b>']);
+  if (ai) tiles.push(['Aire', '<b class="' + ai.clase + '">' + ai.titulo + '</b>']);
   if (la && min !== null) tiles.push([NOMBRE_MODO[modoL][0].toUpperCase() + NOMBRE_MODO[modoL].slice(1) + ' · ' + corto(la.n, 12), '<b>' + min + ' min</b>']);
   if (e && e.bus !== null && e.bus.d <= 700) tiles.push(['Colectivo', '<b>' + metros(e.bus.d) + '</b>']);
   if (!tiles.length) return '';
-  const lug = lugaresHtml(g), sol = solHtml(g);
+  const lug = lugaresHtml(g), sol = solHtml(g), aire = aireHtml(g);
   return '<div class="tiles">' + tiles.map(t => '<div class="tile"><small>' + t[0] + '</small>' + t[1] + '</div>').join('') + '</div>' +
-    '<details class="ent-det"><summary>Ver detalle</summary>' + entornoBase(g) + (lug ? '<div class="ent">' + lug + '</div>' : '') + (sol ? '<div class="ent">' + sol + '</div>' : '') + '</details>';
+    '<details class="ent-det"><summary>Ver detalle</summary>' + entornoBase(g) + (lug ? '<div class="ent">' + lug + '</div>' : '') + (sol ? '<div class="ent">' + sol + '</div>' : '') + (aire ? '<div class="ent">' + aire + '</div>' : '') + '</details>';
 }
 
 /* ---------- historial de precios ---------- */
@@ -1340,7 +1458,8 @@ function capsulas(g) {
   if (g.baja) t.push('<span class="cap baja" title="Bajó el alquiler en los últimos 14 días">' + FLECHA + 'Bajó ' + money(g.baja) + '</span>');
   if (g.cmp !== null && g.cmp <= -10) t.push('<span class="cap bueno" title="Alquiler por m² comparado con ' + g.pares + ' avisos de tamaño parecido de esta lista">' + (-g.cmp) + '% menos que similares</span>');
   else if (g.cmp !== null && g.cmp >= 10) t.push('<span class="tag" title="Alquiler por m² comparado con ' + g.pares + ' avisos de tamaño parecido de esta lista">' + g.cmp + '% más que similares</span>');
-  if (g.x && g.x.has('vc')) t.push('<span class="cap bueno" title="El aviso menciona ventilación cruzada, pasante o ventanas al frente y al contrafrente (lo dice el aviso, no está verificado)">Corriente de aire</span>');
+  if (g.x && g.x.has('vc')) t.push('<span class="cap bueno" title="El aviso menciona ventilación cruzada, pasante o ventanas al frente y al contrafrente (lo dice el aviso, no está verificado)">Ventilación cruzada</span>');
+  else { const ai = aireDatos(g); if (ai && ai.nivel === 'buena') t.push('<span class="cap bueno" title="Estimado: viento frecuente (NNE–NE) que le llega a la fachada sin que lo tapen edificios vecinos">Corriente de aire</span>'); }
   return t.join('');
 }
 // lo que va en segundo plano, al lado de los sitios donde está publicado el aviso
@@ -1368,7 +1487,7 @@ function render() {
   guardar('alq-filtros3', Object.assign({ v: 3, min, max, so: $('so').value, vista }, o));
   $('mkt').href = urlMarketplace(min, max);
   const la = lugarActivo(), okL = g => { if (!la || !maxL) return true; const t = minutos(g, la, modoL); return t === null || t <= maxL; };
-  const base = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.fmas || g.x.has('mas')) && (!o.fasc || g.x.has('asc')) && (!o.fbal || g.x.has('bal')) && (!o.famo || g.x.has('amo')) && (!o.fcoc || g.x.has('coc')) && (!o.fvc || g.x.has('vc')) && okL(g);
+  const base = g => (o.bd || g.z === 'i') && (!o.pa || g.f.has('P')) && (!o.sc || g.f.has('S')) && (!o.fmas || g.x.has('mas')) && (!o.fasc || g.x.has('asc')) && (!o.fbal || g.x.has('bal')) && (!o.famo || g.x.has('amo')) && (!o.fcoc || g.x.has('coc')) && (!o.fvc || aireBuena(g)) && okL(g);
   const porVista = { todos: () => true, sinver: g => !visto(g), nuevos: g => !!g.nuevo, bajaron: g => !!g.baja };
   const main = [], unk = [], n = { todos: 0, sinver: 0, nuevos: 0, bajaron: 0 };
   groups.forEach((g, i) => {
@@ -1564,6 +1683,7 @@ function cerrarHoja() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && (hojaItems || sel)) cerrarHoja(); });
 // al abrir el historial, la hoja se desplaza para que el gráfico quede entero a la vista
 $('hoja').addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.hist') && d.open) setTimeout(() => d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30); }, true);
+setTimeout(cargarEdificios, 1500);
 </script>
 </body>
 </html>
