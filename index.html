@@ -552,6 +552,7 @@ details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 2
 .aire-ley i.v2 { background: #8e8e93; opacity: 0.8; }
 .aire-b .ent-s { margin-top: 8px; font-size: 11.5px; }
 
+.perfil { display: inline-block; margin-top: 8px; padding: 2px 11px; border-radius: 980px; font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--ink); }
 /* historial de precios en la tarjeta */
 details.hist { margin-top: 8px; border-radius: 14px; background: var(--chip); grid-column: 1 / -1; min-width: 0; }
 details.hist > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; font-size: 13px; font-weight: 500; }
@@ -751,12 +752,23 @@ function hace(ts) {
   if (h < 36) return 'hace ' + h + ' h';
   return 'hace ' + Math.round(h / 24) + ' días';
 }
-function leer(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
-function guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+// Perfil: el de siempre (Mariano) o un invitado (Lando). El invitado entra una vez con el link /lando/ (?u=lando) y el dispositivo lo recuerda.
+// Cada perfil tiene sus propios vistos (y su registro en el servidor de sincronización), filtros y lugares.
+const CLAVES_SYNC = { '': '_ZlohwnvSAgZU8Q7kn8TXy-B', lando: 'sr3uYWvc2xpCgwsky2qGn0Mt' };
+const NOMBRE_PERFIL = { lando: 'Lando' };
+const PERFIL = (() => { try { const u = new URLSearchParams(location.search).get('u'); if (u !== null) { if (u.toLowerCase() === 'lando') localStorage.setItem('alq-perfil', 'lando'); else localStorage.removeItem('alq-perfil'); } return localStorage.getItem('alq-perfil') === 'lando' ? 'lando' : ''; } catch (e) { return ''; } })();
+const clavePerfil = k => (PERFIL && k.startsWith('alq-') ? 'alq-' + PERFIL + '-' + k.slice(4) : k);
+function leer(k, def) { try { const v = localStorage.getItem(clavePerfil(k)); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+function guardar(k, v) { try { localStorage.setItem(clavePerfil(k), JSON.stringify(v)); } catch (e) {} }
+if (PERFIL) {
+  document.title = 'Alquileres · ' + NOMBRE_PERFIL[PERFIL];
+  const t = document.querySelector('.ptop h1');
+  if (t) t.insertAdjacentHTML('afterend', '<div class="perfil" title="Tus vistos, filtros y lugares se guardan aparte de los de otras personas">Perfil de ' + NOMBRE_PERFIL[PERFIL] + '</div>');
+}
 
 let D = null, groups = [], NAMES = {}, FIT = {}, vistos = new Set(leer('alq-vistos', [])), sel = null, vigentes = [], hojaItems = null, pastillas = [];
 // Los vistos se comparten entre dispositivos: cada aviso guarda [momento del cambio, 1 = visto | 0 = ya no visto] y gana el cambio más nuevo.
-const SYNC = 'https://alquileres-sync.notengoplumas.workers.dev/vistos?k=_ZlohwnvSAgZU8Q7kn8TXy-B';
+const SYNC = 'https://alquileres-sync.notengoplumas.workers.dev/vistos?k=' + CLAVES_SYNC[PERFIL];
 let cambios = leer('alq-cambios', {}), tSync = 0, sincronizando = false, otraVez = false;
 for (const k of vistos) if (!cambios[k]) cambios[k] = [1, 1];
 const mins = [500000, 550000, 600000, 650000], maxs = [650000, 700000, 750000, 800000, 850000];
