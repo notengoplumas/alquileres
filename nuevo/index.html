@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F4E1DE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1530" media="(prefers-color-scheme: dark)">
 <title>Alquileres Nueva Córdoba</title>
 <script>
 // Aplica el tema elegido antes de pintar, para que no parpadee.
@@ -17,7 +19,7 @@
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* Dirección: el mapa es la pantalla. Una hoja de vidrio con la lista flota encima (a la izquierda en la compu, abajo en el celu).
    Apple: gris/blanco/negro, un solo azul para acciones y selección, naranja = nuevo, verde = bajó de precio.
@@ -348,6 +350,64 @@ details.ent-det[open] > summary::after { transform: rotate(-135deg) translateY(-
 }
 .lugar-linea { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hoja .lugar-linea { white-space: normal; }
+/* ===== paleta: rosa niebla #F4E1DE, azul tinta #1D2B5C y esmeralda #00A060 =====
+   Rosa = lienzo, azul = texto y controles, esmeralda = lo nuevo y lo que se puede hacer. El modo oscuro es el mismo mundo al revés: azul tinta de fondo y texto rosa. */
+:root {
+  --rosa: #F4E1DE; --azul: #1D2B5C; --verde: #00A060;
+  --bg: #F4E1DE; --surface: #FBF3F1; --surface2: #EFD9D5; --ink: #1D2B5C; --ink2: #5A6285; --line: #E2C9C4; --line2: #8B8FA9;
+  --accent: #1D2B5C; --accent-ink: #F4E1DE; --link: #1D2B5C; --accent-soft: rgba(29, 43, 92, 0.09);
+  --nuevo-bg: rgba(0, 160, 96, 0.15); --nuevo-ink: #006B45; --nuevo-fill: #00A060; --nuevo-fill-ink: #ffffff;
+  --baja-bg: rgba(0, 160, 96, 0.15); --baja-ink: #006B45; --warn-ink: #9B1C1C; --alto-bg: #F6CFCA; --alto-ink: #9B1C1C;
+  --chip: #EBD3CF; --chip-ink: #1D2B5C; --chip-on: #1D2B5C; --chip-on-ink: #F4E1DE;
+  --pill: #ffffff; --pill-ink: #1D2B5C; --visto-fill: #E6D3D0; --visto-ink: #8A8FA9;
+  --glass: rgba(244, 225, 222, 0.88); --glass-line: rgba(29, 43, 92, 0.1);
+  --shadow: 0 1px 2px rgba(29, 43, 92, 0.1), 0 12px 32px rgba(29, 43, 92, 0.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1530; --surface: #1D2B5C; --surface2: #162250; --ink: #F4E1DE; --ink2: #B9B6CC; --line: #33417A; --line2: #7C85B0;
+    --accent: #F4E1DE; --accent-ink: #1D2B5C; --link: #F4E1DE; --accent-soft: rgba(244, 225, 222, 0.14);
+    --nuevo-bg: rgba(0, 160, 96, 0.25); --nuevo-ink: #5FE0AB; --nuevo-fill: #00A060; --nuevo-fill-ink: #ffffff;
+    --baja-bg: rgba(0, 160, 96, 0.25); --baja-ink: #5FE0AB; --warn-ink: #FF9C95; --alto-bg: rgba(255, 120, 110, 0.22); --alto-ink: #FF9C95;
+    --chip: #2B3A78; --chip-ink: #F4E1DE; --chip-on: #F4E1DE; --chip-on-ink: #1D2B5C;
+    --pill: #2B3A78; --pill-ink: #F4E1DE; --visto-fill: #162250; --visto-ink: #8A93C0;
+    --glass: rgba(18, 27, 66, 0.86); --glass-line: rgba(244, 225, 222, 0.12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.5); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1530; --surface: #1D2B5C; --surface2: #162250; --ink: #F4E1DE; --ink2: #B9B6CC; --line: #33417A; --line2: #7C85B0;
+  --accent: #F4E1DE; --accent-ink: #1D2B5C; --link: #F4E1DE; --accent-soft: rgba(244, 225, 222, 0.14);
+  --nuevo-bg: rgba(0, 160, 96, 0.25); --nuevo-ink: #5FE0AB; --nuevo-fill: #00A060; --nuevo-fill-ink: #ffffff;
+  --baja-bg: rgba(0, 160, 96, 0.25); --baja-ink: #5FE0AB; --warn-ink: #FF9C95; --alto-bg: rgba(255, 120, 110, 0.22); --alto-ink: #FF9C95;
+  --chip: #2B3A78; --chip-ink: #F4E1DE; --chip-on: #F4E1DE; --chip-on-ink: #1D2B5C;
+  --pill: #2B3A78; --pill-ink: #F4E1DE; --visto-fill: #162250; --visto-ink: #8A93C0;
+  --glass: rgba(18, 27, 66, 0.86); --glass-line: rgba(244, 225, 222, 0.12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.5); color-scheme: dark;
+}
+h1 { font-weight: 400; letter-spacing: -0.03em; }
+h1 b { font-weight: 700; }
+.cap.nuevo { background: var(--verde); color: #ffffff; }
+.cap.bueno { background: var(--accent-soft); color: var(--ink); }
+.nivel.bajo { background: var(--baja-bg); color: var(--baja-ink); }
+.nivel.medio { background: var(--accent-soft); color: var(--ink); }
+.nivel.si { background: rgba(255, 204, 0, 0.3); color: #6B5200; }
+.nivel.no { background: var(--chip); color: var(--ink2); }
+:root[data-theme="dark"] .nivel.si { color: #FFD84D; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .nivel.si { color: #FFD84D; } }
+.tile b.bajo { color: var(--baja-ink); }
+.tile b.medio { color: var(--ink); }
+.punto, .fuentes li::before { background: var(--verde); }
+.punto.mal, .fuentes li.mal::before { background: var(--warn-ink); }
+.aviso { background: var(--alto-bg); color: var(--alto-ink); }
+.pill.sel { background: var(--accent); color: var(--accent-ink); }
+.pill.sel i { background: var(--accent-ink); color: var(--accent); }
+.vb[aria-pressed="true"] .o { background: var(--verde); border-color: var(--verde); }
+.ubtn .n { background: var(--verde); color: #ffffff; }
+#lpForm button { background: var(--verde); color: #ffffff; font-weight: 600; }
+.lugar-pin { background: var(--verde); }
+.sombras-lienzo { opacity: 0.3; }
+.leyenda i.i-def { background: var(--ink); }
 </style>
 </head>
 <body>
@@ -360,7 +420,7 @@ details.ent-det[open] > summary::after { transform: rotate(-135deg) translateY(-
 
   <div class="ptop" id="ptop">
     <div class="fila1">
-      <h1>Alquileres en Nueva Córdoba</h1>
+      <h1>Alquileres en <b>Nueva Córdoba</b></h1>
       <button class="tema" id="tema" type="button" aria-label="Tema de la página" title="Tema"></button>
     </div>
     <div class="estado">
@@ -848,7 +908,7 @@ function dibujarSombras() {
   const mpp = 156543.03 * Math.cos(c.lat * Math.PI / 180) / Math.pow(2, m.getZoom());
   const k = 1 / (Math.tan(s.alt) * mpp), maxPx = 220 / mpp;
   const ux = Math.sin(s.az + Math.PI) * k, uy = -Math.cos(s.az + Math.PI) * k;
-  ctx.fillStyle = '#000';
+  ctx.fillStyle = oscuro() ? '#000000' : '#1D2B5C';
   const vista = m.getBounds().pad(0.35);
   for (const b of EDIF) {
     const q0 = b.pts[0]; if (!vista.contains(q0)) continue;
@@ -940,7 +1000,7 @@ function solDatos(g) {
 function solHtml(g) {
   const s = solDatos(g); if (!s) return '';
   const r = s.r;
-  return '<div class="sol"><div class="ent-r"><span>Sol en la fachada</span><b class="nivel ' + (s.tramos.length ? 'medio' : 'bajo') + '">' + (s.tramos.length ? 'Sí' : 'No') + '</b></div>' +
+  return '<div class="sol"><div class="ent-r"><span>Sol en la fachada</span><b class="nivel ' + (s.tramos.length ? 'si' : 'no') + '">' + (s.tramos.length ? 'Sí' : 'No') + '</b></div>' +
     '<div class="sol-tira" role="img" aria-label="' + s.texto + '">' + r.celdas.map((e, i) => '<i class="e' + e + '" title="' + (7 + i) + ' h: ' + ['sin sol', 'sombra de edificios vecinos', 'el sol da del otro lado de la fachada', 'sol directo'][e] + '"></i>').join('') + '</div>' +
     '<div class="sol-h"><span>7</span><span>13</span><span>19 h</span></div>' +
     '<div class="ent-s">' + s.texto + ' (' + NOMBRE_FECHA[modoFecha] + '). Fachada hacia el ' + s.dir + (g.or ? ', según el aviso' : ', la que da a la calle') + '.' + (r.supuesto ? ' Se supone un 3.º piso.' : '') + '</div></div>';
@@ -1207,6 +1267,7 @@ function iniciarMapa() {
 function temaMapa() { if (LM.m) ponerBase(LM.m); pintarMapa(); }
 // Un precio por edificio (misma dirección). Si dos precios se taparían entre sí, el más barato (o el nuevo) conserva su precio y el otro
 // queda como punto, que muestra el precio al pasar el mouse y aparece completo al acercar el mapa. Así no hay números de "agrupados".
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 function pintarMapa() {
   const m = LM.m; if (!m) return;
   m._capa.clearLayers(); pastillas = [];
@@ -1238,8 +1299,8 @@ function pintarMapa() {
     const choca = ocupados.some(o => caja.x1 < o.x2 && caja.x2 > o.x1 && caja.y1 < o.y2 && caja.y2 > o.y1);
     const titulo = etiqueta(b.items[0]) + ' · ' + money(b.total) + (n > 1 ? ' · ' + n + ' avisos en este edificio' : '');
     if (choca && !b.sel) {
-      const relleno = b.vistos ? (osc ? '#636366' : '#aeaeb2') : b.nuevo ? '#ff9f0a' : (osc ? '#f5f5f7' : '#1d1d1f');
-      const mk = L.circleMarker(b.p, { radius: b.nuevo ? 6 : 5, color: osc ? '#1c1c1e' : '#ffffff', weight: 1.5, fillColor: relleno, fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
+      const relleno = b.vistos ? css('--line2') : b.nuevo ? css('--nuevo-fill') : css('--ink');
+      const mk = L.circleMarker(b.p, { radius: b.nuevo ? 6 : 5, color: css('--surface'), weight: 1.5, fillColor: relleno, fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
       mk.bindTooltip(titulo);
       mk.on('click', () => elegirCelda(b));
       continue;
@@ -1251,10 +1312,10 @@ function pintarMapa() {
     mk.on('click', () => elegirCelda(b));
     pastillas.push({ items: b.items, mk });
   }
-  const sinExpensas = osc ? '#a1a1a6' : '#6e6e73';
+  const sinExpensas = css('--ink2');
   for (const q of sueltos) {
     const esSel = sel === q.g;
-    const mk = L.circleMarker(q.p, { radius: esSel ? 9 : 5, color: esSel ? (osc ? '#0a84ff' : '#0071e3') : sinExpensas, weight: 2.5, fillColor: osc ? '#1c1c1e' : '#ffffff', fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
+    const mk = L.circleMarker(q.p, { radius: esSel ? 9 : 5, color: esSel ? css('--accent') : sinExpensas, weight: 2.5, fillColor: css('--surface'), fillOpacity: 1, bubblingMouseEvents: false }).addTo(m._capa);
     mk.bindTooltip(etiqueta(q.g) + ' · alquiler ' + money(q.g.r) + ', expensas sin publicar');
     mk.on('click', () => elegirCelda({ items: [q.g] }));
   }
