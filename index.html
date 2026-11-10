@@ -345,7 +345,7 @@ details.ent-det[open] > summary::after { transform: rotate(-135deg) translateY(-
   .ubtn { font-size: 13px; padding: 6px 8px; gap: 5px; }
   .topbar .tabs { flex: 1 1 auto; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--glass-line); }
   .topbar .tabs button { padding: 6px 11px; }
-  .panel { height: calc(214px + env(safe-area-inset-bottom, 0px)); }
+  .panel { height: calc(258px + env(safe-area-inset-bottom, 0px)); }
   .panel[data-estado="half"] { height: 56dvh; }
   .panel[data-estado="full"] { height: calc(100dvh - 52px); }
 }
@@ -553,6 +553,10 @@ details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 2
 .aire-b .ent-s { margin-top: 8px; font-size: 11.5px; }
 
 .perfil { display: inline-block; margin-top: 8px; padding: 2px 11px; border-radius: 980px; font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--ink); }
+.zonafila { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.zonafila .lab { font-size: 13px; color: var(--ink2); flex: 0 0 auto; }
+.zonafila .tabs { flex: 1 1 auto; }
+.filtros > .zonafila { margin: 0 0 10px; }
 /* historial de precios en la tarjeta */
 details.hist { margin-top: 8px; border-radius: 14px; background: var(--chip); grid-column: 1 / -1; min-width: 0; }
 details.hist > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; font-size: 13px; font-weight: 500; }
@@ -615,6 +619,13 @@ details.hist > summary b.sube { background: var(--alto-bg); color: var(--alto-in
         <summary><span class="punto" id="punto"></span><span id="sello">Cargando…</span></summary>
         <ul id="fl"></ul>
       </details>
+    </div>
+    <div class="zonafila" id="zonafila"><span class="lab">Zona</span>
+      <div class="tabs zonas" id="zonas" role="group" aria-label="Qué zona ver">
+        <button type="button" data-zona="nano" aria-pressed="true" title="Zona de Nano: entre Bv. Illia, Bv. Chacabuco, Paraná y Poeta Lugones">Nano</button>
+        <button type="button" data-zona="lando" aria-pressed="false" title="Zona de Lando: el resto de su mapa (Nueva Córdoba, Centro, Güemes y Alberdi), sin la zona de Nano">Lando</button>
+        <button type="button" data-zona="ambas" aria-pressed="false" title="Las dos zonas juntas">Ambas</button>
+      </div>
     </div>
     <div id="aviso"></div>
   </div>
@@ -771,6 +782,27 @@ let D = null, groups = [], NAMES = {}, FIT = {}, vistos = new Set(leer('alq-vist
 const SYNC = 'https://alquileres-sync.notengoplumas.workers.dev/vistos?k=' + CLAVES_SYNC[PERFIL];
 let cambios = leer('alq-cambios', {}), tSync = 0, sincronizando = false, otraVez = false;
 for (const k of vistos) if (!cambios[k]) cambios[k] = [1, 1];
+// Zona que se ve: la de Nano (Bv. Illia, Bv. Chacabuco, Paraná y Poeta Lugones), la de Lando (el resto de su mapa: Nueva Córdoba, Centro, Güemes y Alberdi) o las dos juntas.
+// Cada perfil recuerda la suya. Los datos de la zona de Lando se bajan solo cuando hacen falta.
+const ZONAS = ['nano', 'lando', 'ambas'];
+let DL = null, VISTA = leer('alq-zona', PERFIL === 'lando' ? 'ambas' : 'nano');
+if (!ZONAS.includes(VISTA)) VISTA = PERFIL === 'lando' ? 'ambas' : 'nano';
+const conLando = () => VISTA !== 'nano' && !!DL;
+function filasVista() {
+  if (!conLando()) return D.filas;
+  if (VISTA === 'lando') return DL.filas;
+  const ya = new Set(D.filas.map(r => r.s + ':' + r.id)); // si un aviso figura en las dos zonas, se cuenta una sola vez
+  return D.filas.concat(DL.filas.filter(r => !ya.has(r.s + ':' + r.id)));
+}
+const zonaVista = () => (conLando() ? DL.zona : D.zona);
+const generadoVista = () => (VISTA === 'ambas' && DL ? Math.min(D.generado, DL.generado) : VISTA === 'lando' && DL ? DL.generado : D.generado);
+function fuentesVista() {
+  return ['Z', 'L', 'A', 'M'].map(k => {
+    const a = VISTA !== 'lando' || !DL ? D.fuentes[k] : null, b = conLando() ? DL.fuentes[k] : null;
+    if (a && b) return { nombre: a.nombre, ok: a.ok && b.ok, ts: Math.min(a.ts || 0, b.ts || 0) || null, error: a.error || b.error };
+    return a || b || null;
+  }).filter(Boolean);
+}
 const mins = [500000, 550000, 600000, 650000], maxs = [650000, 700000, 750000, 800000, 850000];
 const LM = {};
 
@@ -792,6 +824,8 @@ function ubicar() {
   const mv = esMovil(), panel = $('panel');
   if (mv) { if ($('ptop').parentNode !== $('scroll')) $('scroll').insertBefore($('ptop'), $('scroll').firstChild); if ($('tabs').parentNode !== $('topbar')) $('topbar').appendChild($('tabs')); }
   else { if ($('ptop').parentNode !== panel) panel.insertBefore($('ptop'), $('filtros')); if ($('tabs').parentNode !== $('filtros')) $('filtros').insertBefore($('tabs'), $('fUtil')); }
+  if (mv) { if ($('zonafila').parentNode !== $('filtros')) $('filtros').insertBefore($('zonafila'), $('filtros').firstChild); }
+  else if ($('zonafila').parentNode !== $('ptop')) $('ptop').insertBefore($('zonafila'), $('aviso'));
   panel.style.height = '';
 }
 ubicar();
@@ -802,7 +836,7 @@ const ESTADOS = ['peek', 'half', 'full'];
 function estadoHoja(e) { const p = $('panel'); p.classList.remove('arrastrando'); p.style.height = ''; p.dataset.estado = e; }
 (function () {
   const p = $('panel'); let y0 = 0, h0 = 0, t0 = 0, mov = false, activo = false;
-  const altos = () => { const H = window.innerHeight; return [214, H * 0.56, H - 52]; };
+  const altos = () => { const H = window.innerHeight; return [258, H * 0.56, H - 52]; };
   const abajo = e => {
     if (!esMovil() || e.target.closest('select, a, button')) return;
     activo = true; mov = false; y0 = e.clientY; t0 = performance.now(); h0 = p.getBoundingClientRect().height;
@@ -837,17 +871,24 @@ async function cargarDatos() {
   }
   throw new Error('sin datos');
 }
+async function cargarDatosLando() {
+  for (const url of [DATOS_BASE + 'data_lando.json', 'data_lando.json']) {
+    try { const r = await fetch(url + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) return await r.json(); } catch (e) {}
+  }
+  return null;
+}
 cargarDatos()
+  .then(async d => { if (VISTA !== 'nano') { DL = await cargarDatosLando(); if (!DL) VISTA = 'nano'; } return d; })
   .then(init)
   .catch(() => { $('sello').textContent = 'Sin datos todavía'; $('count').textContent = 'Sin datos todavía'; $('list').innerHTML = '<div class="vacio">Todavía no hay datos. Ejecutá "2 - Actualizar ahora" en la compu para generar el primer resultado.</div>'; });
 
 function leerZona() { for (const k in D.zona.calles) { NAMES[k] = D.zona.calles[k].nombre; FIT[k] = D.zona.calles[k].fit; } }
 // Dibuja la línea de estado (hace cuánto se actualizó y si algún sitio falló); se repite cada tanto para que el "hace X min" no quede viejo.
 function pintarEstado() {
-  const fuentes = ['Z', 'L', 'A', 'M'].map(k => D.fuentes[k]).filter(Boolean);
-  const fallan = fuentes.filter(s => !s.ok).length, horas = (Date.now() - D.generado) / 3600000;
-  $('sello').innerHTML = 'Actualizado ' + hace(D.generado) + (fallan ? ' <span class="mal-txt">· ' + fallan + (fallan === 1 ? ' sitio sin leer' : ' sitios sin leer') + '</span>' : '');
-  $('sello').title = new Date(D.generado).toLocaleString('es-AR', { dateStyle: 'medium', timeStyle: 'short' });
+  const fuentes = fuentesVista();
+  const fallan = fuentes.filter(s => !s.ok).length, horas = (Date.now() - generadoVista()) / 3600000;
+  $('sello').innerHTML = 'Actualizado ' + hace(generadoVista()) + (fallan ? ' <span class="mal-txt">· ' + fallan + (fallan === 1 ? ' sitio sin leer' : ' sitios sin leer') + '</span>' : '');
+  $('sello').title = new Date(generadoVista()).toLocaleString('es-AR', { dateStyle: 'medium', timeStyle: 'short' });
   $('punto').className = 'punto' + (fallan || horas > 14 ? ' mal' : '');
   $('fl').innerHTML = fuentes.map(s => '<li class="' + (s.ok ? '' : 'mal') + '"' + (!s.ok && s.error ? ' title="' + s.error.replace(/"/g, '') + '"' : '') + '>' + s.nombre + ' ' + (s.ok ? hace(s.ts) : (s.ts ? 'sin leer desde ' + hace(s.ts).replace('hace ', '') : 'sin datos')) + '</li>').join('');
   $('aviso').textContent = '';
@@ -866,21 +907,21 @@ function init(d) {
 // Trae los datos nuevos sin recargar la página (cada 5 minutos y al volver a la pestaña). No toca la tarjeta si hay una abierta.
 function refrescar() {
   if (!D || document.hidden || !$('hoja').hidden) return;
-  cargarDatos().then(d => {
-    if (d.generado !== D.generado) { D = d; leerZona(); sel = null; armarGrupos(); render(); }
+  Promise.all([cargarDatos(), VISTA !== 'nano' ? cargarDatosLando() : null]).then(([d, dl]) => {
+    if (d.generado !== D.generado || (dl && (!DL || dl.generado !== DL.generado))) { D = d; if (dl) DL = dl; leerZona(); sel = null; armarGrupos(); render(); }
     pintarEstado();
   }).catch(() => {});
 }
 
 /* ---------- avisos repetidos: se muestran una sola vez ---------- */
 function armarGrupos() {
-  const rows = D.filas.map(r => Object.assign({}, r, { f: r.f || '' }));
+  const rows = filasVista().map(r => Object.assign({}, r, { f: r.f || '' }));
   rows.sort((a, b) => (b.e !== null) - (a.e !== null));
   const same = (g, r) => {
     if (g.r !== r.r) return false;
     if (g.st === '?' || r.st === '?') {
-      if (g.st !== r.st || g.lat == null || r.lat == null) return false;
-      return Math.hypot((r.lat - g.lat) * 111000, (r.lng - g.lng) * 94900) < 40 && (g.e === r.e || g.e === null || r.e === null);
+      const a = pos(g), b = pos(r); if (!a || !b) return false;
+      return Math.hypot((b[0] - a[0]) * 111000, (b[1] - a[1]) * 94900) < 40 && (g.e === r.e || g.e === null || r.e === null);
     }
     if (g.st !== r.st || Math.abs(g.n - r.n) > 60) return false;
     return !(g.e !== null && r.e !== null && g.e !== r.e);
@@ -997,9 +1038,11 @@ function compararPrecios() {
     g.cmp = Math.round((g.r / g.m / med - 1) * 100); g.pares = pares.length;
   }
 }
-let ENT = null; const CACHE_ENT = {};
+let ENT = null, ENT_FUENTE = ''; const CACHE_ENT = {};
 function cargarEntorno() {
-  fetch(DATOS_BASE + 'entorno.json').then(r => (r.ok ? r.json() : null)).then(j => { if (j) { ENT = j; if (hojaItems && !$('hoja').hidden) hoja(hojaItems); } }).catch(() => {});
+  const lando = VISTA !== 'nano';
+  if (ENT && (ENT_FUENTE === 'lando' || !lando)) return;
+  fetch(DATOS_BASE + (lando ? 'entorno_lando.json' : 'entorno.json')).then(r => (r.ok ? r.json() : null)).then(j => { if (j) { ENT = j; ENT_FUENTE = lando ? 'lando' : 'nano'; for (const k in CACHE_ENT) delete CACHE_ENT[k]; if (hojaItems && !$('hoja').hidden) hoja(hojaItems); } }).catch(() => {});
 }
 const metros = d => (d < 1000 ? Math.max(10, Math.round(d / 10) * 10) + ' m' : (d / 1000).toFixed(1).replace('.', ',') + ' km');
 function entornoDe(g) {
@@ -1052,10 +1095,13 @@ let horaSol = (() => { const d = new Date(); return Math.min(19, Math.max(8, d.g
 const FECHAS = { hoy: () => new Date(), verano: () => new Date(new Date().getFullYear(), 11, 21), invierno: () => new Date(new Date().getFullYear(), 5, 21) };
 const NOMBRE_FECHA = { hoy: 'hoy', verano: '21 de diciembre', invierno: '21 de junio' };
 
+let EDIF_FUENTE = '';
 function cargarEdificios() {
-  if (EDIF || cargandoEdif) return; cargandoEdif = true;
-  fetch(DATOS_BASE + 'edificios.json').then(r => (r.ok ? r.json() : null)).then(j => {
+  const lando = VISTA !== 'nano';
+  if (cargandoEdif || (EDIF && (EDIF_FUENTE === 'lando' || !lando))) return; cargandoEdif = true;
+  fetch(DATOS_BASE + (lando ? 'edificios_lando.json' : 'edificios.json')).then(r => (r.ok ? r.json() : null)).then(j => {
     if (!j) return;
+    EDIF_FUENTE = lando ? 'lando' : 'nano';
     const C = 60; GRILLA = new Map();
     EDIF = j.b.map(([h, pts], i) => {
       const xy = pts.map(aMetros); let a = 0, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
@@ -1564,11 +1610,11 @@ function capasBase(m) {
   return [respaldo(L.tileLayer(OSM, { maxNativeZoom: 19, maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }), ESRI, 'Mapa © Esri')];
 }
 function ponerBase(m) { (m._base || []).forEach(c => m.removeLayer(c)); m._base = capasBase(m); m._base.forEach(c => c.addTo(m)); m.getContainer().classList.toggle('osc', oscuro()); }
-const limitesZona = () => L.latLngBounds(D.zona.poligono.map(p => [p[1], p[0]]));
+const limitesZona = () => L.latLngBounds(zonaVista().poligono.map(p => [p[1], p[0]]));
 // Zona visible: en la compu es lo que queda a la derecha de la hoja; en el celu, lo que queda entre los filtros y la hoja de abajo.
 function margenes() {
   const r = $('panel').getBoundingClientRect();
-  if (esMovil()) return { tl: [16, 64], br: [16, 214 + 24] };
+  if (esMovil()) return { tl: [16, 64], br: [16, 258 + 24] };
   return { tl: [r.right + 28, 28], br: [76, 28] };
 }
 function ajustarMapa(animar) {
@@ -1695,6 +1741,30 @@ function cerrarHoja() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && (hojaItems || sel)) cerrarHoja(); });
 // al abrir el historial, la hoja se desplaza para que el gráfico quede entero a la vista
 $('hoja').addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.hist') && d.open) setTimeout(() => d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30); }, true);
+/* ---------- zona que se ve ---------- */
+const TITULO_H1 = document.querySelector('.ptop h1').innerHTML;
+function marcarZona() {
+  document.querySelectorAll('#zonas button').forEach(b => b.setAttribute('aria-pressed', b.dataset.zona === VISTA ? 'true' : 'false'));
+  document.querySelector('.ptop h1').innerHTML = VISTA === 'nano' ? TITULO_H1 : 'Alquileres en <b>Córdoba centro</b>';
+}
+let cambiandoZona = false;
+async function cambiarZona(z) {
+  if (!D || z === VISTA || cambiandoZona) return;
+  cambiandoZona = true;
+  try {
+    if (z !== 'nano' && !DL) {
+      $('count').innerHTML = 'Cargando la zona de Lando…';
+      DL = await cargarDatosLando();
+      if (!DL) { render(); $('aviso').innerHTML = '<div class="aviso">No se pudo cargar la zona de Lando. Probá de nuevo en un rato.</div>'; return; }
+    }
+    VISTA = z; guardar('alq-zona', z); marcarZona();
+    sel = null; hojaItems = null; $('hoja').hidden = true; document.body.classList.remove('conhoja');
+    aireCache.clear(); armarGrupos(); render(); pintarEstado(); ajustarMapa(true);
+    cargarEntorno(); cargarEdificios();
+  } finally { cambiandoZona = false; }
+}
+$('zonas').addEventListener('click', e => { const b = e.target.closest('button[data-zona]'); if (b) cambiarZona(b.dataset.zona); });
+marcarZona();
 setTimeout(cargarEdificios, 1500);
 </script>
 </body>
