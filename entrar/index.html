@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F4E1DE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1530" media="(prefers-color-scheme: dark)">
+<title>Alquileres · Entrar</title>
+<style>
+:root {
+  --bg: #F4E1DE; --card: #FFF8F6; --ink: #1D2B5C; --ink2: #5B6591; --line: rgba(29, 43, 92, 0.16); --chip: rgba(29, 43, 92, 0.08);
+  --accent: #00A060; --accent-ink: #ffffff; --err: #b3261e; --sombra: 0 1px 2px rgba(29, 43, 92, 0.16), 0 14px 32px rgba(29, 43, 92, 0.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0E1530; --card: #19224A; --ink: #F4E1DE; --ink2: #B7B3CC; --line: rgba(244, 225, 222, 0.2); --chip: rgba(244, 225, 222, 0.1); --err: #ff8a80; --sombra: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 32px rgba(0, 0, 0, 0.35); }
+}
+:root[data-theme="dark"] { --bg: #0E1530; --card: #19224A; --ink: #F4E1DE; --ink2: #B7B3CC; --line: rgba(244, 225, 222, 0.2); --chip: rgba(244, 225, 222, 0.1); --err: #ff8a80; --sombra: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 32px rgba(0, 0, 0, 0.35); }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: grid; place-items: center; min-height: 100dvh; padding: 24px 16px; -webkit-font-smoothing: antialiased; }
+.caja { width: min(400px, 100%); background: var(--card); border-radius: 26px; padding: 28px 24px 22px; box-shadow: var(--sombra); position: relative; }
+.marca { position: absolute; right: 18px; top: 16px; width: 86px; height: 57px; filter: drop-shadow(0 6px 8px rgba(29, 43, 92, 0.22)); pointer-events: none; }
+h1 { margin: 0; font-size: 28px; line-height: 1.04; letter-spacing: -0.035em; font-weight: 300; max-width: 190px; }
+h1 b { display: block; font-weight: 700; }
+.sub { margin: 26px 0 10px; font-size: 14px; color: var(--ink2); font-weight: 500; }
+.quien { display: flex; padding: 3px; gap: 2px; background: var(--chip); border-radius: 980px; box-shadow: inset 0 1px 3px rgba(29, 43, 92, 0.14); }
+.quien button { flex: 1; border: 0; background: transparent; color: var(--ink2); font: inherit; font-size: 15px; font-weight: 500; padding: 9px 12px; border-radius: 980px; cursor: pointer; min-height: 40px; transition: background-color 0.2s, box-shadow 0.2s, color 0.2s; }
+.quien button[aria-pressed="true"] { background: var(--card); color: var(--ink); font-weight: 700; box-shadow: 0 1px 2px rgba(29, 43, 92, 0.2), 0 5px 12px rgba(29, 43, 92, 0.12); }
+label { display: block; margin: 20px 0 6px; font-size: 14px; color: var(--ink2); font-weight: 500; }
+input { width: 100%; font: inherit; font-size: 17px; color: var(--ink); background: var(--chip); border: 1.5px solid transparent; border-radius: 14px; padding: 12px 14px; min-height: 48px; outline: none; letter-spacing: 0.04em; }
+input:focus { border-color: var(--ink); background: transparent; }
+.entrar { width: 100%; margin-top: 14px; border: 0; cursor: pointer; font: inherit; font-size: 16px; font-weight: 700; color: var(--accent-ink); background: linear-gradient(180deg, #17BF7E, #00A060 60%, #008A52); border-radius: 980px; min-height: 48px; box-shadow: 0 3px 8px rgba(0, 160, 96, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28); }
+.entrar:disabled { opacity: 0.55; cursor: default; }
+.err { min-height: 20px; margin: 10px 2px 0; color: var(--err); font-size: 13.5px; font-weight: 500; }
+.seguir { margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--ink2); }
+.seguir a { color: var(--ink); font-weight: 700; }
+.pie { margin: 14px 2px 0; font-size: 12.5px; color: var(--ink2); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="caja">
+  <svg class="marca" viewBox="0 0 100 66" aria-hidden="true">
+    <defs>
+      <linearGradient id="e1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3A4A8A"/><stop offset="1" stop-color="#1D2B5C"/></linearGradient>
+      <linearGradient id="e2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#55639F"/><stop offset="1" stop-color="#2A3B7C"/></linearGradient>
+      <linearGradient id="ll" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2BD08B"/><stop offset="1" stop-color="#008A52"/></linearGradient>
+    </defs>
+    <ellipse cx="48" cy="62" rx="44" ry="3" fill="rgba(29,43,92,0.16)"/>
+    <rect x="6" y="28" width="26" height="32" rx="4" fill="url(#e2)"/>
+    <g fill="#F4E1DE" opacity="0.88"><rect x="11" y="34" width="6" height="6" rx="1.5"/><rect x="21" y="34" width="6" height="6" rx="1.5"/><rect x="11" y="44" width="6" height="6" rx="1.5"/><rect x="21" y="44" width="6" height="6" rx="1.5"/></g>
+    <rect x="68" y="20" width="26" height="40" rx="4" fill="url(#e2)"/>
+    <g fill="#F4E1DE" opacity="0.88"><rect x="73" y="26" width="6" height="6" rx="1.5"/><rect x="83" y="26" width="6" height="6" rx="1.5"/><rect x="73" y="36" width="6" height="6" rx="1.5"/><rect x="83" y="36" width="6" height="6" rx="1.5"/><rect x="73" y="46" width="6" height="6" rx="1.5"/></g>
+    <rect x="33" y="5" width="32" height="55" rx="5" fill="url(#e1)"/>
+    <rect x="36" y="8" width="4" height="30" rx="2" fill="rgba(255,255,255,0.16)"/>
+    <g fill="#F4E1DE" opacity="0.9"><rect x="38" y="12" width="6" height="6" rx="1.5"/><rect x="47" y="12" width="6" height="6" rx="1.5"/><rect x="56" y="12" width="6" height="6" rx="1.5"/><rect x="38" y="22" width="6" height="6" rx="1.5"/><rect x="47" y="22" width="6" height="6" rx="1.5"/><rect x="38" y="32" width="6" height="6" rx="1.5"/><rect x="56" y="32" width="6" height="6" rx="1.5"/><rect x="47" y="32" width="6" height="6" rx="1.5"/></g>
+    <g fill="#3DD68F"><rect x="56" y="22" width="6" height="6" rx="1.5"/></g>
+    <rect x="45" y="46" width="10" height="14" rx="2.5" fill="#F4E1DE" opacity="0.92"/>
+    <circle cx="84" cy="52" r="12.5" fill="url(#ll)"/>
+    <ellipse cx="79.5" cy="46.5" rx="4.5" ry="2.8" fill="rgba(255,255,255,0.3)"/>
+    <g transform="rotate(-35 84 52)" stroke="#ffffff" stroke-width="1.9" stroke-linecap="round" fill="none"><circle cx="79.6" cy="52" r="3.1"/><path d="M82.7 52h9M88.5 52v3M91.7 52v2.2"/></g>
+  </svg>
+  <h1>Alquileres en <b>Córdoba</b></h1>
+  <p class="sub">¿Quién entra?</p>
+  <div class="quien" id="quien" role="group" aria-label="Quién entra">
+    <button type="button" data-p="nano" aria-pressed="true">Nano</button>
+    <button type="button" data-p="lando" aria-pressed="false">Lando</button>
+  </div>
+  <form id="f" autocomplete="off">
+    <label for="codigo">Código de <span id="nombre">Nano</span></label>
+    <input id="codigo" type="password" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="current-password" enterkeyhint="go" required>
+    <button class="entrar" id="entrar" type="submit">Entrar</button>
+    <p class="err" id="err" role="alert" aria-live="polite"></p>
+  </form>
+  <p class="seguir" id="seguir" hidden>Ya hay una sesión abierta en este aparato como <b id="quienSesion"></b>. <a href="../">Seguir</a></p>
+  <p class="pie">Cada uno ve sus propios vistos, filtros y lugares.</p>
+</main>
+<script>
+const DATOS_BASE = 'https://raw.githubusercontent.com/notengoplumas/alquileres/datos/';
+const $ = id => document.getElementById(id);
+const NOMBRES = { nano: 'Nano', lando: 'Lando' };
+const guardado = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+let perfil = (new URLSearchParams(location.search).get('u') || guardado('alq-ultimo-perfil') || 'nano').toLowerCase();
+if (!NOMBRES[perfil]) perfil = 'nano';
+let fallos = 0, espera = 0, reloj = null;
+
+function marcar() {
+  document.querySelectorAll('#quien button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === perfil ? 'true' : 'false'));
+  $('nombre').textContent = NOMBRES[perfil];
+  $('err').textContent = '';
+}
+document.querySelectorAll('#quien button').forEach(b => b.addEventListener('click', () => { perfil = b.dataset.p; marcar(); $('codigo').focus(); }));
+
+// sesión ya abierta
+try { const s = JSON.parse(guardado('alq-sesion') || 'null'); if (s && NOMBRES[s.p]) { $('quienSesion').textContent = NOMBRES[s.p]; $('seguir').hidden = false; } } catch (e) {}
+
+const aHex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+const deHex = h => new Uint8Array(h.match(/.{2}/g).map(x => parseInt(x, 16)));
+async function huella(codigo, saltHex, iter) {
+  const clave = await crypto.subtle.importKey('raw', new TextEncoder().encode(codigo), 'PBKDF2', false, ['deriveBits']);
+  return aHex(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: deHex(saltHex), iterations: iter, hash: 'SHA-256' }, clave, 256));
+}
+function bloquear(seg) {
+  espera = seg; $('entrar').disabled = true;
+  clearInterval(reloj);
+  reloj = setInterval(() => {
+    espera--;
+    if (espera <= 0) { clearInterval(reloj); $('entrar').disabled = false; $('entrar').textContent = 'Entrar'; $('err').textContent = ''; }
+    else $('entrar').textContent = 'Esperá ' + espera + ' s';
+  }, 1000);
+  $('entrar').textContent = 'Esperá ' + espera + ' s';
+}
+$('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (espera > 0) return;
+  const codigo = $('codigo').value.trim().toLowerCase();
+  if (!codigo) return;
+  $('entrar').disabled = true; $('err').textContent = '';
+  try {
+    const r = await fetch(DATOS_BASE + 'perfiles.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('sin archivo');
+    const p = await r.json(), x = p.perfiles && p.perfiles[perfil];
+    if (!x) throw new Error('sin perfil');
+    const h = await huella(codigo, x.salt, p.iter || 100000);
+    if (h === x.hash) {
+      try { localStorage.setItem('alq-sesion', JSON.stringify({ p: perfil, v: x.hash.slice(0, 12), t: Date.now() })); localStorage.setItem('alq-ultimo-perfil', perfil); } catch (err) { $('err').textContent = 'Este navegador no deja guardar la sesión. Probá sin modo privado.'; $('entrar').disabled = false; return; }
+      location.replace('../');
+      return;
+    }
+    fallos++;
+    $('err').textContent = 'Ese no es el código de ' + NOMBRES[perfil] + '. Probá de nuevo.';
+    $('codigo').select();
+    if (fallos >= 5) { bloquear(Math.min(30, (fallos - 4) * 5)); $('err').textContent = 'Ese no es el código de ' + NOMBRES[perfil] + '.'; } else $('entrar').disabled = false;
+  } catch (err) {
+    $('err').textContent = 'No pude verificar el código ahora. Revisá la conexión y probá de nuevo.';
+    $('entrar').disabled = false;
+  }
+});
+marcar();
+$('codigo').focus();
+</script>
+</body>
+</html>
