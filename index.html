@@ -13,6 +13,10 @@
 // Aplica el tema elegido antes de pintar, para que no parpadee.
 (function () { try { var t = localStorage.getItem('alq-tema'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
 </script>
+<script>
+// Sin sesión abierta no se muestra nada: se va a la pantalla de entrada (entrar/).
+(function () { try { var s = JSON.parse(localStorage.getItem('alq-sesion') || 'null'); if (s && (s.p === 'nano' || s.p === 'lando')) return; } catch (e) {} location.replace('entrar/'); })();
+</script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -346,6 +350,7 @@ details.ent-det[open] > summary::after { transform: rotate(-135deg) translateY(-
   .topbar .tabs { flex: 1 1 auto; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--glass-line); }
   .topbar .tabs button { padding: 6px 11px; }
   .panel { height: calc(258px + env(safe-area-inset-bottom, 0px)); }
+  body.solo-lando .panel[data-estado="peek"] { height: calc(214px + env(safe-area-inset-bottom, 0px)); }
   .panel[data-estado="half"] { height: 56dvh; }
   .panel[data-estado="full"] { height: calc(100dvh - 52px); }
 }
@@ -557,6 +562,11 @@ details.mas > summary { margin-bottom: 8px; padding: 14px 16px; border-radius: 2
 .zonafila .lab { font-size: 13px; color: var(--ink2); flex: 0 0 auto; }
 .zonafila .tabs { flex: 1 1 auto; }
 .filtros > .zonafila { margin: 0 0 10px; }
+.estado { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.sesion { flex: none; display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer; font: inherit; font-size: 12px; color: var(--ink2); background: var(--chip); border-radius: 980px; padding: 3px 10px 3px 11px; min-height: 26px; }
+.sesion b { color: var(--ink); font-weight: 700; }
+.sesion svg { width: 13px; height: 13px; stroke: currentColor; }
+.sesion:hover { filter: brightness(0.96); }
 /* historial de precios en la tarjeta */
 details.hist { margin-top: 8px; border-radius: 14px; background: var(--chip); grid-column: 1 / -1; min-width: 0; }
 details.hist > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; font-size: 13px; font-weight: 500; }
@@ -732,6 +742,9 @@ details.hist > summary b.sube { background: var(--alto-bg); color: var(--alto-in
 
 
 <script>
+// Sesión abierta en entrar/ con el código de Nano o de Lando. Si no hay, no se arranca nada (el aviso de arriba ya mandó a la entrada).
+const SESION = (() => { try { const s = JSON.parse(localStorage.getItem('alq-sesion') || 'null'); return s && (s.p === 'nano' || s.p === 'lando') ? s : null; } catch (e) { return null; } })();
+if (!SESION) throw new Error('sin sesión');
 const SRC = {
   Z: ['ZonaProp', id => 'https://www.zonaprop.com.ar/propiedades/clasificado/alclapin-x-' + id + '.html'],
   L: ['La Voz', id => 'https://clasificados.lavoz.com.ar/avisos/inmuebles/departamento/' + id + '/x'],
@@ -767,15 +780,17 @@ function hace(ts) {
 // Cada perfil tiene sus propios vistos (y su registro en el servidor de sincronización), filtros y lugares.
 const CLAVES_SYNC = { '': '_ZlohwnvSAgZU8Q7kn8TXy-B', lando: 'sr3uYWvc2xpCgwsky2qGn0Mt' };
 const NOMBRE_PERFIL = { lando: 'Lando' };
-const PERFIL = (() => { try { const u = new URLSearchParams(location.search).get('u'); if (u !== null) { if (u.toLowerCase() === 'lando') localStorage.setItem('alq-perfil', 'lando'); else localStorage.removeItem('alq-perfil'); } return localStorage.getItem('alq-perfil') === 'lando' ? 'lando' : ''; } catch (e) { return ''; } })();
+const PERFIL = SESION.p === 'lando' ? 'lando' : ''; // Nano usa los datos de siempre; Lando los suyos, aparte
+const PEEK = PERFIL === 'lando' ? 214 : 258; // alto de la hoja cerrada en el celu (Nano tiene además el selector de zona)
 const clavePerfil = k => (PERFIL && k.startsWith('alq-') ? 'alq-' + PERFIL + '-' + k.slice(4) : k);
 function leer(k, def) { try { const v = localStorage.getItem(clavePerfil(k)); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
 function guardar(k, v) { try { localStorage.setItem(clavePerfil(k), JSON.stringify(v)); } catch (e) {} }
-if (PERFIL) {
-  document.title = 'Alquileres · ' + NOMBRE_PERFIL[PERFIL];
-  const t = document.querySelector('.ptop h1');
-  if (t) t.insertAdjacentHTML('afterend', '<div class="perfil" title="Tus vistos, filtros y lugares se guardan aparte de los de otras personas">Perfil de ' + NOMBRE_PERFIL[PERFIL] + '</div>');
-}
+// Quién está adentro y cómo salir (arriba, al lado del estado)
+const NOMBRE_SESION = PERFIL === 'lando' ? 'Lando' : 'Nano';
+if (PERFIL === 'lando') { document.title = 'Alquileres · Lando'; document.body.classList.add('solo-lando'); }
+$('fuentes').insertAdjacentHTML('afterend', '<button class="sesion" id="sesion" type="button" title="Cerrar la sesión de ' + NOMBRE_SESION + ' en este aparato"><b>' + NOMBRE_SESION + '</b><span>Salir</span><svg viewBox="0 0 16 16" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.2 2.5H3.8A1.3 1.3 0 0 0 2.5 3.8v8.4a1.3 1.3 0 0 0 1.3 1.3h2.4M10.4 11.2 13.5 8l-3.1-3.2M13.5 8H6.4"/></svg></button>');
+function cerrarSesion() { try { localStorage.removeItem('alq-sesion'); } catch (e) {} location.replace('entrar/' + (PERFIL === 'lando' ? '?u=lando' : '')); }
+$('sesion').addEventListener('click', cerrarSesion);
 
 let D = null, groups = [], NAMES = {}, FIT = {}, vistos = new Set(leer('alq-vistos', [])), sel = null, vigentes = [], hojaItems = null, pastillas = [];
 // Los vistos se comparten entre dispositivos: cada aviso guarda [momento del cambio, 1 = visto | 0 = ya no visto] y gana el cambio más nuevo.
@@ -785,8 +800,8 @@ for (const k of vistos) if (!cambios[k]) cambios[k] = [1, 1];
 // Zona que se ve: la de Nano (Bv. Illia, Bv. Chacabuco, Paraná y Poeta Lugones), la de Lando (el resto de su mapa: Nueva Córdoba, Centro, Güemes y Alberdi) o las dos juntas.
 // Cada perfil recuerda la suya. Los datos de la zona de Lando se bajan solo cuando hacen falta.
 const ZONAS = ['nano', 'lando', 'ambas'];
-let DL = null, VISTA = leer('alq-zona', PERFIL === 'lando' ? 'ambas' : 'nano');
-if (!ZONAS.includes(VISTA)) VISTA = PERFIL === 'lando' ? 'ambas' : 'nano';
+let DL = null, VISTA = PERFIL === 'lando' ? 'lando' : leer('alq-zona', 'nano');
+if (!ZONAS.includes(VISTA) || (PERFIL === 'lando' && VISTA !== 'lando')) VISTA = PERFIL === 'lando' ? 'lando' : 'nano';
 const conLando = () => VISTA !== 'nano' && !!DL;
 function filasVista() {
   if (!conLando()) return D.filas;
@@ -836,7 +851,7 @@ const ESTADOS = ['peek', 'half', 'full'];
 function estadoHoja(e) { const p = $('panel'); p.classList.remove('arrastrando'); p.style.height = ''; p.dataset.estado = e; }
 (function () {
   const p = $('panel'); let y0 = 0, h0 = 0, t0 = 0, mov = false, activo = false;
-  const altos = () => { const H = window.innerHeight; return [258, H * 0.56, H - 52]; };
+  const altos = () => { const H = window.innerHeight; return [PEEK, H * 0.56, H - 52]; };
   const abajo = e => {
     if (!esMovil() || e.target.closest('select, a, button')) return;
     activo = true; mov = false; y0 = e.clientY; t0 = performance.now(); h0 = p.getBoundingClientRect().height;
@@ -1614,7 +1629,7 @@ const limitesZona = () => L.latLngBounds(zonaVista().poligono.map(p => [p[1], p[
 // Zona visible: en la compu es lo que queda a la derecha de la hoja; en el celu, lo que queda entre los filtros y la hoja de abajo.
 function margenes() {
   const r = $('panel').getBoundingClientRect();
-  if (esMovil()) return { tl: [16, 64], br: [16, 258 + 24] };
+  if (esMovil()) return { tl: [16, 64], br: [16, PEEK + 24] };
   return { tl: [r.right + 28, 28], br: [76, 28] };
 }
 function ajustarMapa(animar) {
@@ -1741,15 +1756,21 @@ function cerrarHoja() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && (hojaItems || sel)) cerrarHoja(); });
 // al abrir el historial, la hoja se desplaza para que el gráfico quede entero a la vista
 $('hoja').addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.hist') && d.open) setTimeout(() => d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30); }, true);
+// Si se cambió el código de este perfil (crear_perfiles.js), la sesión vieja deja de valer.
+fetch(DATOS_BASE + 'perfiles.json?t=' + Date.now(), { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).then(p => {
+  const x = p && p.perfiles && p.perfiles[SESION.p];
+  if (x && SESION.v && x.hash.slice(0, 12) !== SESION.v) cerrarSesion();
+}).catch(() => {});
 /* ---------- zona que se ve ---------- */
 const TITULO_H1 = document.querySelector('.ptop h1').innerHTML;
 function marcarZona() {
+  $('zonafila').style.display = PERFIL === 'lando' ? 'none' : '';
   document.querySelectorAll('#zonas button').forEach(b => b.setAttribute('aria-pressed', b.dataset.zona === VISTA ? 'true' : 'false'));
   document.querySelector('.ptop h1').innerHTML = VISTA === 'nano' ? TITULO_H1 : 'Alquileres en <b>Córdoba centro</b>';
 }
 let cambiandoZona = false;
 async function cambiarZona(z) {
-  if (!D || z === VISTA || cambiandoZona) return;
+  if (!D || z === VISTA || cambiandoZona || (PERFIL === 'lando' && z !== 'lando')) return; // Lando solo ve su zona
   cambiandoZona = true;
   try {
     if (z !== 'nano' && !DL) {
